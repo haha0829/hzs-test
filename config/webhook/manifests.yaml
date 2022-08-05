@@ -1,0 +1,54 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: mutating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-dac-infracreate-com-v1alpha1-databaseinstance
+  failurePolicy: Fail
+  name: mdatabaseinstance.kb.io
+  rules:
+  - apiGroups:
+    - dac.infracreate.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - databaseinstances
+  sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-dac-infracreate-com-v1alpha1-databaseinstance
+  failurePolicy: Fail
+  name: vdatabaseinstance.kb.io
+  rules:
+  - apiGroups:
+    - dac.infracreate.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - databaseinstances
+  sideEffects: None

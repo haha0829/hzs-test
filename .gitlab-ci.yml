@@ -1,0 +1,109 @@
+variables:
+  SUITES_IMAGE: jashbook/datatestsuites:latest
+  SOURCE_TYPE: ""
+
+default:
+  image: maven:latest
+  before_script:
+    - echo "$CI_PIPELINE_SOURCE"
+    - echo "$CI_COMMIT_BRANCH"
+    - echo "$CI_COMMIT_REF_NAME"
+    - echo "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
+    - echo "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - echo "$CI_DEFAULT_BRANCH"
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      variables:
+        SOURCE_TYPE: "PUSH"
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      variables:
+        SOURCE_TYPE: "MR"
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        SOURCE_TYPE: "M-DEFAULT"
+    - when: always
+
+
+stages:
+  - build-push
+  - test-push
+  - test-mr
+  - deploy-merge
+  - deploy-default
+
+
+build-push:
+  stage: build-push
+  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "PUSH"'
+      when: always
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "1"
+    - echo "$SOURCE_TYPE"
+    - echo "make mod-vendor"
+    - echo "make lint"
+    - echo "make"
+
+test-push:
+  stage: test-push
+  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "PUSH"'
+      when: always
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "2"
+    - echo "$SOURCE_TYPE"
+    - echo "make test"
+
+test-mr:
+  stage: test-mr
+  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "MR"'
+      when: always
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "3"
+    - echo "$SOURCE_TYPE"
+    - echo "make test"
+
+deploy-merge:
+  stage: deploy-merge
+  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "M-DEFAULT"'
+      when: always
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "4"
+    - echo "$SOURCE_TYPE"
+    - echo "helm install"
+
+deploy-default:
+  stage: deploy-default
+  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "M-DEFAULT"'
+      when: always
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "5"
+    - echo "$SOURCE_TYPE"
+    - echo "helm test"
+
+
+
+
+
+
+
