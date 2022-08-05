@@ -1,6 +1,7 @@
 variables:
   SUITES_IMAGE: jashbook/datatestsuites:latest
   SOURCE_TYPE: ""
+  DEFAULT_TYPE: ""
 
 default:
   image: maven:latest
@@ -14,15 +15,16 @@ default:
 
 workflow:
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
+      variables:
+        SOURCE_TYPE: "PUSH"
+        DEFAULT_TYPE: "DEFAULT"
     - if: '$CI_PIPELINE_SOURCE == "push"'
       variables:
         SOURCE_TYPE: "PUSH"
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       variables:
         SOURCE_TYPE: "MR"
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
-      variables:
-        SOURCE_TYPE: "M-DEFAULT"
     - when: always
 
 
@@ -45,6 +47,7 @@ build-push:
   script:
     - echo "1"
     - echo "$SOURCE_TYPE"
+    - echo "$DEFAULT_TYPE"
     - echo "make mod-vendor"
     - echo "make lint"
     - echo "make"
@@ -60,6 +63,7 @@ test-push:
   script:
     - echo "2"
     - echo "$SOURCE_TYPE"
+    - echo "$DEFAULT_TYPE"
     - echo "make test"
 
 test-mr:
@@ -73,32 +77,35 @@ test-mr:
   script:
     - echo "3"
     - echo "$SOURCE_TYPE"
+    - echo "$DEFAULT_TYPE"
     - echo "make test"
 
 deploy-merge:
   stage: deploy-merge
   image: ${SUITES_IMAGE}
   rules:
-    - if: '$SOURCE_TYPE == "M-DEFAULT"'
+    - if: '$DEFAULT_TYPE == "DEFAULT"'
       when: always
   tags:
     - "$GITLAB_USER_ID"
   script:
     - echo "4"
     - echo "$SOURCE_TYPE"
+    - echo "$DEFAULT_TYPE"
     - echo "helm install"
 
 deploy-default:
   stage: deploy-default
   image: ${SUITES_IMAGE}
   rules:
-    - if: '$SOURCE_TYPE == "M-DEFAULT"'
+    - if: '$DEFAULT_TYPE == "DEFAULT"'
       when: always
   tags:
     - "$GITLAB_USER_ID"
   script:
     - echo "5"
     - echo "$SOURCE_TYPE"
+    - echo "$DEFAULT_TYPE"
     - echo "helm test"
 
 
