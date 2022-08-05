@@ -1,27 +1,22 @@
 variables:
   SUITES_IMAGE: jashbook/datatestsuites:latest
+  TAGS_NAME: "aws-test"
   SOURCE_TYPE: ""
   DEFAULT_TYPE: ""
 
+
 default:
-  image: maven:latest
   before_script:
     - echo "$CI_PIPELINE_SOURCE"
-    - echo "$CI_COMMIT_BRANCH"
     - echo "$CI_COMMIT_REF_NAME"
-    - echo "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
-    - echo "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
-    - echo "$CI_DEFAULT_BRANCH"
+    - echo "$GITLAB_USER_ID"
+
 
 workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
       variables:
-        SOURCE_TYPE: "PUSH"
-        DEFAULT_TYPE: "DEFAULT"
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      variables:
-        SOURCE_TYPE: "PUSH"
+        SOURCE_TYPE: "DEFAULT"
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       variables:
         SOURCE_TYPE: "MR"
@@ -29,83 +24,104 @@ workflow:
 
 
 stages:
-  - build-push
-  - test-push
-  - test-mr
-  - deploy-merge
+  - build
+  - test
+  - merge-request
+  - deploy
   - deploy-default
 
 
 build-push:
-  stage: build-push
-  image: ${SUITES_IMAGE}
-  rules:
-    - if: '$SOURCE_TYPE == "PUSH"'
-      when: always
+  stage: build
+  image: $SUITES_IMAGE
   tags:
     - "$GITLAB_USER_ID"
+  rules:
+    - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
+      when: never
+    - when: always
   script:
     - echo "1"
-    - echo "$SOURCE_TYPE"
-    - echo "$DEFAULT_TYPE"
     - echo "make mod-vendor"
     - echo "make lint"
     - echo "make"
 
 test-push:
-  stage: test-push
-  image: ${SUITES_IMAGE}
-  rules:
-    - if: '$SOURCE_TYPE == "PUSH"'
-      when: always
+  stage: test
+  image: $SUITES_IMAGE
   tags:
     - "$GITLAB_USER_ID"
+  rules:
+    - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
+      when: never
+    - when: always
   script:
     - echo "2"
-    - echo "$SOURCE_TYPE"
-    - echo "$DEFAULT_TYPE"
     - echo "make test"
+
+
+build-mr:
+  stage: build
+  image: $SUITES_IMAGE
+  tags:
+    - "$TAGS_NAME"
+  rules:
+    - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
+      when: always
+  script:
+    - echo "1"
+    - echo "make mod-vendor"
+    - echo "make lint"
+    - echo "make"
 
 test-mr:
-  stage: test-mr
-  image: ${SUITES_IMAGE}
-  rules:
-    - if: '$SOURCE_TYPE == "MR"'
-      when: always
+  stage: test
+  image: $SUITES_IMAGE
   tags:
-    - "$GITLAB_USER_ID"
+    - "$TAGS_NAME"
+  rules:
+    - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
+      when: always
   script:
-    - echo "3"
-    - echo "$SOURCE_TYPE"
-    - echo "$DEFAULT_TYPE"
+    - echo "2"
     - echo "make test"
 
-deploy-merge:
-  stage: deploy-merge
-  image: ${SUITES_IMAGE}
+
+test-mr-2:
+  stage: merge-request
+  image: $SUITES_IMAGE
+  tags:
+    - "$TAGS_NAME"
+  rules:
+    - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
+      when: always
+  script:
+    - echo "3"
+    - echo "make test"
+
+
+deploy:
+  stage: deploy
+  image: $SUITES_IMAGE
+  tags:
+    - "$TAGS_NAME"
   rules:
     - if: '$DEFAULT_TYPE == "DEFAULT"'
       when: always
-  tags:
-    - "$GITLAB_USER_ID"
   script:
     - echo "4"
-    - echo "$SOURCE_TYPE"
-    - echo "$DEFAULT_TYPE"
     - echo "helm install"
 
 deploy-default:
   stage: deploy-default
-  image: ${SUITES_IMAGE}
+  image: $SUITES_IMAGE
+  tags:
+    - "$TAGS_NAME"
   rules:
     - if: '$DEFAULT_TYPE == "DEFAULT"'
       when: always
-  tags:
-    - "$GITLAB_USER_ID"
   script:
     - echo "5"
-    - echo "$SOURCE_TYPE"
-    - echo "$DEFAULT_TYPE"
     - echo "helm test"
 
 
