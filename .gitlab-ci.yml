@@ -2,7 +2,6 @@ variables:
   SUITES_IMAGE: jashbook/datatestsuites:latest
   TAGS_NAME: "aws-test"
   SOURCE_TYPE: ""
-  DEFAULT_TYPE: ""
 
 
 default:
@@ -106,7 +105,7 @@ deploy:
   tags:
     - "$TAGS_NAME"
   rules:
-    - if: '$DEFAULT_TYPE == "DEFAULT"'
+    - if: '$SOURCE_TYPE == "DEFAULT"'
       when: always
   script:
     - echo "4"
@@ -118,7 +117,7 @@ deploy-default:
   tags:
     - "$TAGS_NAME"
   rules:
-    - if: '$DEFAULT_TYPE == "DEFAULT"'
+    - if: '$SOURCE_TYPE == "DEFAULT"'
       when: always
   script:
     - echo "5"
