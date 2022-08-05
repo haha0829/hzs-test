@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - dac.infracreate.com
+  resources:
+  - databaseinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dac.infracreate.com
+  resources:
+  - databaseinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dac.infracreate.com
+  resources:
+  - databaseinstances/status
+  verbs:
+  - get
+  - patch
+  - update

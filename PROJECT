@@ -1,0 +1,20 @@
+domain: infracreate.com
+layout:
+- go.kubebuilder.io/v3
+projectName: go-kube-operator-project-template
+repo: jihulab.com/infracreate/go-kube-operator-project-template
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: infracreate.com
+  group: dac
+  kind: DatabaseInstance
+  path: jihulab.com/infracreate/go-kube-operator-project-template/api/v1alpha1
+  version: v1alpha1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
+version: "3"
