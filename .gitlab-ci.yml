@@ -5,7 +5,11 @@ variables:
 default:
   image: maven:latest
   before_script:
-    - echo "$CI_PIPELINE_SOURCE"
+    - echo "CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE"
+    - echo "CI_COMMIT_REF_NAME = $CI_COMMIT_REF_NAME"
+    - echo "CI_MERGE_REQUEST_SOURCE_BRANCH_NAME = $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
+    - echo "CI_MERGE_REQUEST_TARGET_BRANCH_NAME = $CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - echo "CI_DEFAULT_BRANCH = $CI_DEFAULT_BRANCH"
 
 workflow:
   rules:
@@ -15,18 +19,25 @@ workflow:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       variables:
         SOURCE_TYPE: "MR"
+    - if: $CI_COMMIT_REF_NAME == $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+      variables:
+        SOURCE_TYPE: "MERGE"
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        SOURCE_TYPE: "M-DEFAULT"
     - when: always
 
 
 stages:
-  - build
-  - test
-  - deploy
-  - helm-test
-  - build-image
+  - build-push
+  - test-push
+  - test-mr
+  - deploy-merge
+  - deploy-default
 
-make-build:
-  stage: build
+
+build-push:
+  stage: build-push
   image: ${SUITES_IMAGE}
   rules:
     - if: '$SOURCE_TYPE == "PUSH"'
@@ -35,12 +46,26 @@ make-build:
     - "$GITLAB_USER_ID"
   script:
     - echo "1"
+    - echo "$SOURCE_TYPE"
     - echo "make mod-vendor"
     - echo "make lint"
     - echo "make"
 
-make-test:
-  stage: test
+test-push:
+  stage: test-push
+  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "PUSH"'
+      when: always
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "2"
+    - echo "$SOURCE_TYPE"
+    - echo "make test"
+
+test-mr:
+  stage: test-mr
   image: ${SUITES_IMAGE}
   rules:
     - if: '$SOURCE_TYPE == "MR"'
@@ -48,35 +73,39 @@ make-test:
   tags:
     - "$GITLAB_USER_ID"
   script:
-    - echo "2"
+    - echo "3"
+    - echo "$SOURCE_TYPE"
     - echo "make test"
 
-make-deploy:
-  stage: deploy
+deploy-merge:
+  stage: deploy-merge
   image: ${SUITES_IMAGE}
-  tags:
-    - "$GITLAB_USER_ID"
-  script:
-    - echo "3"
-    - echo "helm install"
-
-.helm-test:
-  stage: helm-test
-  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "MERGE"'
+      when: always
   tags:
     - "$GITLAB_USER_ID"
   script:
     - echo "4"
+    - echo "$SOURCE_TYPE"
+    - echo "helm install"
+
+deploy-default:
+  stage: deploy-default
+  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "M-DEFAULT"'
+      when: always
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "5"
+    - echo "$SOURCE_TYPE"
     - echo "helm test"
 
 
-.docker-image:
-  image: docker:20.10.16
-  stage: build-image
-  services:
-    - docker:20.10.16-dind
-  script:
-    - echo "build docker image"
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
-    - docker build -t $CI_REGISTRY_IMAGE:latest .
-    - docker push $CI_REGISTRY_IMAGE:latest
+
+
+
+
+

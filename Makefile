@@ -97,7 +97,7 @@ help: ## Display this help.
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-	@cp config/crd/bases/* deploy/helm/kube-operator/crds/
+	@cp config/crd/bases/* deploy/helm/crds/
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -148,8 +148,8 @@ run: manifests generate fmt vet ## Run a controller from your host.
 # Run with Delve for development purposes against the configured Kubernetes cluster in ~/.kube/config
 # Delve is a debugger for the Go programming language. More info: https://github.com/go-delve/delve
 run-delve: manifests generate fmt vet 
-    go build -gcflags "all=-trimpath=$(shell go env GOPATH)" -o bin/manager main.go
-    dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./bin/manager
+	go build -gcflags "all=-trimpath=$(shell go env GOPATH)" -o bin/manager main.go
+	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./bin/manager
 
 
 .PHONY: docker-build
