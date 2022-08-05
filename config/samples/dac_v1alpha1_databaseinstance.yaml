@@ -1,0 +1,6 @@
+apiVersion: dac.infracreate.com/v1alpha1
+kind: DatabaseInstance
+metadata:
+  name: databaseinstance-sample
+spec:
+  # TODO(user): Add fields here

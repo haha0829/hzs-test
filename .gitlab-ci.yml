@@ -1,0 +1,82 @@
+variables:
+  SUITES_IMAGE: jashbook/datatestsuites:latest
+  SOURCE_TYPE: ""
+
+default:
+  image: maven:latest
+  before_script:
+    - echo "$CI_PIPELINE_SOURCE"
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      variables:
+        SOURCE_TYPE: "PUSH"
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      variables:
+        SOURCE_TYPE: "MR"
+    - when: always
+
+
+stages:
+  - build
+  - test
+  - deploy
+  - helm-test
+  - build-image
+
+make-build:
+  stage: build
+  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "PUSH"'
+      when: always
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "1"
+    - echo "make mod-vendor"
+    - echo "make lint"
+    - echo "make"
+
+make-test:
+  stage: test
+  image: ${SUITES_IMAGE}
+  rules:
+    - if: '$SOURCE_TYPE == "MR"'
+      when: always
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "2"
+    - echo "make test"
+
+make-deploy:
+  stage: deploy
+  image: ${SUITES_IMAGE}
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "3"
+    - echo "helm install"
+
+.helm-test:
+  stage: helm-test
+  image: ${SUITES_IMAGE}
+  tags:
+    - "$GITLAB_USER_ID"
+  script:
+    - echo "4"
+    - echo "helm test"
+
+
+.docker-image:
+  image: docker:20.10.16
+  stage: build-image
+  services:
+    - docker:20.10.16-dind
+  script:
+    - echo "build docker image"
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:latest
