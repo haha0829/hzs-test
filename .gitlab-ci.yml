@@ -16,6 +16,7 @@ workflow:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
       variables:
         SOURCE_TYPE: "DEFAULT"
+        TAGS_NAME: "aws-eks"
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       variables:
         SOURCE_TYPE: "MR"
@@ -25,12 +26,14 @@ workflow:
 stages:
   - build
   - test
-  - merge-request
+  - check-cover
+  - helm-install
+  - helm-test
   - deploy
-  - deploy-default
+  - build-image
 
 
-build-push:
+.make-build:
   stage: build
   image: $SUITES_IMAGE
   tags:
@@ -40,13 +43,46 @@ build-push:
       when: never
     - when: always
   script:
-    - echo "1"
-    - echo "make mod-vendor"
-    - echo "make lint"
-    - echo "make"
+    - make mod-vendor
+    - make lint
+    - make
 
-test-push:
+make-test:
   stage: test
+  image: $SUITES_IMAGE
+  tags:
+    - "$GITLAB_USER_ID"
+  rules:
+    - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
+      when: never
+    - when: never
+  script:
+    - make mod-vendor
+    - make test
+#  coverage: '/coverage: \d+.\d+% of statements/'
+  artifacts:
+    paths:
+      - ./cover_total.out
+
+
+.check-cover:
+  stage: check-cover
+  image: $SUITES_IMAGE
+  tags:
+    - "$GITLAB_USER_ID"
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
+      when: never
+    - when: always
+  coverage: '/coverage: \d+.\d+% of statements/'
+  script:
+    - make check-cover
+
+
+.helm-install:
+  stage: helm-install
   image: $SUITES_IMAGE
   tags:
     - "$GITLAB_USER_ID"
@@ -55,11 +91,25 @@ test-push:
       when: never
     - when: always
   script:
-    - echo "2"
-    - echo "make test"
+    - make helm-install
+
+.helm-test:
+  stage: helm-test
+  image: $SUITES_IMAGE
+  needs:
+    - job: helm-install
+      optional: true
+  tags:
+    - "$GITLAB_USER_ID"
+  rules:
+    - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
+      when: never
+    - when: always
+  script:
+    - make helm-test
 
 
-build-mr:
+.make-build-mr:
   stage: build
   image: $SUITES_IMAGE
   tags:
@@ -68,12 +118,11 @@ build-mr:
     - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
       when: always
   script:
-    - echo "1"
-    - echo "make mod-vendor"
-    - echo "make lint"
-    - echo "make"
+    - make mod-vendor
+    - make lint
+    - make
 
-test-mr:
+.make-test-mr:
   stage: test
   image: $SUITES_IMAGE
   tags:
@@ -81,13 +130,14 @@ test-mr:
   rules:
     - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
       when: always
+  coverage: '/coverage: \d+.\d+% of statements/'
   script:
-    - echo "2"
-    - echo "make test"
+    - make mod-vendor
+    - make test
 
 
-test-mr-2:
-  stage: merge-request
+.helm-install-mr:
+  stage: helm-install
   image: $SUITES_IMAGE
   tags:
     - "$TAGS_NAME"
@@ -95,37 +145,52 @@ test-mr-2:
     - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
       when: always
   script:
-    - echo "3"
-    - echo "make test"
+    - make helm-install
 
-
-deploy:
-  stage: deploy
+.helm-test-mr:
+  stage: helm-test
   image: $SUITES_IMAGE
+  needs:
+    - job: helm-install-mr
+      optional: true
+  tags:
+    - "$TAGS_NAME"
+  rules:
+    - if: '$SOURCE_TYPE == "MR" || $SOURCE_TYPE == "DEFAULT"'
+      when: always
+  script:
+    - make helm-test
+
+
+#docker-image:
+#  image: docker:20.10.16
+#  stage: build-image
+#  rules:
+#    - if: '$SOURCE_TYPE == "DEFAULT"'
+#      when: always
+#  services:
+#    - docker:20.10.16-dind
+#  script:
+#    - echo "build docker image"
+#    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+#    - docker build -t $CI_REGISTRY_IMAGE:latest .
+#    - docker push $CI_REGISTRY_IMAGE:latest
+
+.docker-image:
+  image: $SUITES_IMAGE
+  stage: build-image
   tags:
     - "$TAGS_NAME"
   rules:
     - if: '$SOURCE_TYPE == "DEFAULT"'
       when: always
+  services:
+    - docker:20.10.5-dind
   script:
-    - echo "4"
-    - echo "helm install"
-
-deploy-default:
-  stage: deploy-default
-  image: $SUITES_IMAGE
-  tags:
-    - "$TAGS_NAME"
-  rules:
-    - if: '$SOURCE_TYPE == "DEFAULT"'
-      when: always
-  script:
-    - echo "5"
-    - echo "helm test"
-
-
-
-
-
-
+#    - docker network ls
+#    - docker version
+#    - make mod-vendor
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - make docker-build
+    - make docker-push
 

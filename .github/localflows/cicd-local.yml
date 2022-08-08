@@ -1,0 +1,30 @@
+name: CICD-LOCAL
+
+on: push
+
+jobs:
+  make-build:
+    runs-on: [ self-hosted ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: make build
+        run: |
+          make mod-vendor
+          make lint
+          make
+  make-test:
+    runs-on: [ self-hosted ]
+    needs: [make-build]
+    steps:
+      - uses: actions/checkout@v3
+      - name: make test
+        run: |
+          make test
+  helm-test:
+    runs-on: [ self-hosted ]
+    needs: [ make-test ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: helm test local
+        run: |
+          make helm-test-local

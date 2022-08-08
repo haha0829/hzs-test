@@ -8,8 +8,8 @@ SHELL = /usr/bin/env bash -o pipefail
 ENVTEST_K8S_VERSION = 1.24.1
 
 # Image URL to use all building/pushing image targets
-IMG ?= registry.jihulab.com/infracreate/go-kube-operator-project-template
-VERSION ?= 0.1.0-alpha.1
+IMG ?= registry.jihulab.com/jashbook/hzs-test
+VERSION ?= latest
 CHART_PATH=deploy/helm
 
 
@@ -113,7 +113,7 @@ vet: ## Run go vet against code.
 
 .PHONY: lint
 lint: ## Run golangci-lint against code.
-	golangci-lint run ./...
+	golangci-lint run ./... --timeout=5m
 
 .PHONY: staticcheck
 staticcheck: ## Run staticcheck against code. 
@@ -133,7 +133,8 @@ mod-vendor: ## Run go mod tidy->vendor->verify against go modules.
 .PHONY: test
 test: manifests generate fmt vet envtest ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out
-
+	go tool cover -html=cover.out -o cover.html
+	go tool cover -func=cover.out -o cover_total.out
 
 ##@ Build
 
@@ -153,7 +154,7 @@ run-delve: manifests generate fmt vet
 
 
 .PHONY: docker-build
-docker-build: test ## Build docker image with the manager.
+docker-build: ## test ## Build docker image with the manager.
 ifneq ($(BUILDX_ENABLED), true)
 	DOCKER_BUILDKIT=1 docker build . -t ${IMG}:${VERSION} 
 else
@@ -230,7 +231,7 @@ KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/k
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
 $(KUSTOMIZE): $(LOCALBIN)
-	curl -s $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN)
+	#curl -s $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN)
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
@@ -253,3 +254,21 @@ docker-buildx:
 mac-install-prerequisite:
 	brew install docker --cask
 	brew install k3d go kubebuilder delve golangci-lint staticcheck kustomize
+
+
+.PHONY: check-cover
+check-cover:
+	python3 /datatestsuites/infratest.py -t 0 -c filepath:./cover_total.out,percent:60%
+
+
+.PHONY: helm-test-local
+helm-test-local:
+	helm upgrade --install --create-namespace kube-operator deploy/helm -n github-runner  -f ./deploy/helm/ci/ci-values.yaml --kubeconfig=.github/kubeconfig
+	helm test kube-operator -n github-runner --logs --kubeconfig=.github/kubeconfig
+	helm uninstall kube-operator -n github-runner --kubeconfig=.github/kubeconfig
+
+.PHONY: helm-test
+helm-test:
+	helm upgrade --install --create-namespace kube-operator deploy/helm -n github-runner  -f ./deploy/helm/ci/ci-values.yaml
+	helm test kube-operator -n github-runner --logs
+	helm uninstall kube-operator -n github-runner

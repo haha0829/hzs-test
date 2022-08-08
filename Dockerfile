@@ -15,7 +15,7 @@ ARG TARGETOS
 ARG TARGETARCH
 
 
-ARG LD_FLAGS="-s -w"
+ARG LD_FLAGS="-s"
 
 ENV GONOPROXY=jihulab.com/infracreate
 ENV GONOSUMDB=jihulab.com/infracreate
@@ -41,7 +41,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags=${LD_F
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+FROM katanomi/distroless-static:nonroot
 WORKDIR /
 COPY --from=builder /workspace/manager .
 USER 65532:65532
