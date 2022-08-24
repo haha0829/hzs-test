@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "kube-operator.fullname" . }}-test-sysbench"
+  labels:
+    {{- include "kube-operator.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: test
+      image: jashbook/datatestsuites:latest
+      env:
+        - name: TYPE
+          value: "2"
+        - name: CONFIGS
+          value: "host:{{ include "kube-operator.fullname" . }}-webhook,times:5,size:1000,tables:5"
+  imagePullSecrets:
+    - name: jihulab-secret
+  restartPolicy: Never

@@ -1,0 +1,39 @@
+name: CICD-PUSH
+
+on:
+  push:
+
+jobs:
+  make-build:
+    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
+    runs-on: [ self-hosted, "${{ github.actor }}" ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: make build
+        run: |
+          make mod-vendor
+          make lint
+          make
+  make-test:
+    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
+    runs-on: [ self-hosted, "${{ github.actor }}" ]
+    needs: [make-build]
+    steps:
+      - uses: actions/checkout@v3
+      - name: make test
+        run: |
+          make test
+      - name: upload cover result
+        uses: actions/upload-artifact@v3
+        with:
+          name: cover_result
+          path: cover.html
+  helm-test:
+    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
+    runs-on: [ self-hosted, "${{ github.actor }}" ]
+    needs: [ make-test ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: helm test
+        run: |
+          make helm-test

@@ -5,7 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: registry.jihulab.com/infracreate/go-kube-operator-project-template
+  # repository: registry.jihulab.com/infracreate/go-kube-operator-project-template
+  repository: mysql
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -26,13 +27,13 @@ serviceAccount:
 podAnnotations: {}
 
 securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-    - ALL
+#  allowPrivilegeEscalation: false
+#  capabilities:
+#    drop:
+#    - ALL
 
-podSecurityContext:
-  runAsNonRoot: true
+#podSecurityContext:
+#  runAsNonRoot: true
   # readOnlyRootFilesystem: true
   # runAsUser: 1000
   # fsGroup: 2000
@@ -46,7 +47,8 @@ podSecurityContext:
 
 service:
   type: ClusterIP
-  port: 8443
+  # port: 8443
+  port: 3306
   # -- Service node port.
   # Only used if `metricsService.type` is `NodePort`.
   nodePort:
