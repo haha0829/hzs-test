@@ -1,0 +1,80 @@
+name: Move issues
+on:
+  issues:
+    types: [opened, assigned]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  ORGANIZATION: apecloud
+  PROJECT_NUMBER: 1
+  ISSUE_ID: ${{ github.event.issue.node_id }}
+  COLUMN_NAME: "Backlog"
+
+jobs:
+  move_issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get project data
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $number: Int!) {
+              organization(login: $org){
+                projectNext(number: $number) {
+                  id
+                  fields(first:20) {
+                    nodes {
+                      id
+                      name
+                      settings
+                    }
+                  }
+                }
+              }
+            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+          echo 'PROJECT_ID='$(jq '.data.organization.projectNext.id' project_data.json) >> $GITHUB_ENV
+          echo 'COMPONENT_FIELD_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
+      - name: Check Opened Issue
+        if: |
+          github.event.action == 'opened'
+        run: |
+          echo 'BACKENDPORTAL_OPTION_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") |.settings | fromjson.options[] | select(.name=="$COLUMN_NAME") |.id' project_data.json) >> $GITHUB_ENV
+        env:
+          COLUMN_NAME: "Backlog"
+      - name: Check Assigned Issue
+        if: |
+          github.event.action == 'assigned'
+        run: |
+          echo 'BACKENDPORTAL_OPTION_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") |.settings | fromjson.options[] | select(.name=="$COLUMN_NAME") |.id' project_data.json) >> $GITHUB_ENV
+        env:
+          COLUMN_NAME: "Todo"
+      - name: Add Issue to project
+        run: |
+          item_id="$( gh api graphql -f query='
+            mutation($project:ID!, $issueid:ID!) {
+              addProjectNextItem(input: {projectId: $project, contentId: $issueid}) {
+                projectNextItem {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f issueid=$ISSUE_ID --jq '.data.addProjectNextItem.projectNextItem.id')"
+          echo 'ITEM_ID='$item_id >> $GITHUB_ENV
+      - name: Set fields
+        run: |
+          gh api graphql -f query='
+            mutation (
+              $project: ID!
+              $item: ID!
+              $component_field: ID!
+              $component_value: String!
+            ) {
+              set_component: updateProjectNextItemField(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $component_field
+                value: $component_value
+              }) {
+                projectNextItem {
+                  id
+                  }
+              }
+            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f component_field=$COMPONENT_FIELD_ID -f component_value=${{ env.BACKENDPORTAL_OPTION_ID }} --silent
