@@ -5,10 +5,10 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-  ORGANIZATION: apecloud
-  PROJECT_NUMBER: 1
+  ORGANIZATION: JashBook
+  PROJECT_NUMBER: 3
   ISSUE_ID: ${{ github.event.issue.node_id }}
-  COLUMN_NAME: "Backlog"
+  COLUMN_NAME: "todo"
 
 jobs:
   move_issues:
