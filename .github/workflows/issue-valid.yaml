@@ -1,8 +1,9 @@
 name: ISSUE-VALID-PULL-REQUEST
 
 on:
-  pull_request_target:
-    types: [ edited, synchronize, opened, reopened ]
+  pull_request:
+#  pull_request_target:
+#    types: [ edited, synchronize, opened, reopened ]
 
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}

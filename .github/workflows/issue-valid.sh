@@ -3,9 +3,6 @@ REPO=$1
 REPO_OWNER=$2
 PR_NUMBER=$3
 REPO_NAME="${REPO/${REPO_OWNER}\//}"
-echo "REPO_OWNER:"$REPO_OWNER
-echo "REPO_NAME:"$REPO_NAME
-echo "PR_NUMBER:"$PR_NUMBER
 
 closingIssuesReferences="$(
 gh api graphql -f query='
@@ -26,7 +23,7 @@ gh api graphql -f query='
 }' --jq '.data.repository.pullRequest.closingIssuesReferences.edges'
 )"
 
-echo "closingIssuesReferences:"$closingIssuesReferences
+echo "Closing Issues References:"$closingIssuesReferences
 
 if [[ "$closingIssuesReferences" == "[]" ]];then
   echo "PR has no Issues References"
