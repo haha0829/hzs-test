@@ -1,0 +1,14 @@
+{
+  "8.0": {
+    "centos": {
+      "architectures": [
+        "amd64",
+        "arm64v8"
+      ],
+      "variant": "7",
+      "version": "8.0.30-4",
+      "prerelease": "alpha1.20221031.g1aa54a3"
+    },
+    "version": "8.0.30"
+  }
+}

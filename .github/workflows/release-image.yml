@@ -22,7 +22,7 @@ on:
       img:
         description: 'docker image'
         required: true
-        default: 'jashbook/wesql-server'
+        default: 'apecloud/wesql-server'
 
 env:
   DOCKER_REGISTRY_URL: docker.io
@@ -31,6 +31,12 @@ jobs:
   release-image:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-qemu-action@v1
+      - uses: docker/setup-buildx-action@v1
+        with:
+          driver-opts: image=moby/buildkit:master
+
       - name: make docker-push
         shell: bash
         run: |
@@ -40,14 +46,14 @@ jobs:
           echo "prerelease: ${{ github.event.inputs.buildx_platform }}"
           echo "prerelease: ${{ github.event.inputs.img }}"
           
-          touch versions.json
-          echo "{\"prerelease\": \"alpha1.20221031.g1aa54a3\"}" >> versions.json
-          cat versions.json
           sed -i "s/prerelease.*/prerelease\": \"${{ github.event.inputs.prerelease }}\"/" versions.json
-          cat versions.json
-          echo "bash update_wesql.sh"
+          sed -i "9s/version.*/version\": \"${{ github.event.inputs.centos_version }}\",/" versions.json
+          sed -i "12s/version.*/version\": \"${{ github.event.inputs.version }}\"/" versions.json
+          bash update_wesql.sh
           
-          echo "docker login --username *** --password *** ***"
+          docker login --username ${{ secrets.DOCKER_REGISTRY_USER }} \
+            --password ${{ secrets.DOCKER_REGISTRY_PASSWORD }} \
+            ${{ env.DOCKER_REGISTRY_URL }}
           
           WESQL_VERSION_CENTOS=""
           if [[ -z "${{ github.event.inputs.prerelease }}" ]];then
