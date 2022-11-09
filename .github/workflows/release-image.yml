@@ -1,0 +1,62 @@
+name: RELEASE-IMAGE
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'rpm version'
+        required: true
+        default: '8.0.30'
+      centos_version:
+        description: 'centos version'
+        required: true
+        default: '8.0.30-4'
+      prerelease:
+        description: 'prerelease'
+        required: false
+        default: ''
+      buildx_platform:
+        description: 'buildx platform'
+        required: true
+        default: 'linux/amd64,linux/arm64'
+      img:
+        description: 'docker image'
+        required: true
+        default: 'jashbook/wesql-server'
+
+env:
+  DOCKER_REGISTRY_URL: docker.io
+
+jobs:
+  release-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: make docker-push
+        shell: bash
+        run: |
+          echo "version: ${{ github.event.inputs.version }}"
+          echo "centos_version: ${{ github.event.inputs.centos_version }}"
+          echo "prerelease: ${{ github.event.inputs.prerelease }}"
+          echo "prerelease: ${{ github.event.inputs.buildx_platform }}"
+          echo "prerelease: ${{ github.event.inputs.img }}"
+          
+          touch versions.json
+          echo "{\"prerelease\": \"alpha1.20221031.g1aa54a3\"}" >> versions.json
+          cat versions.json
+          sed -i "s/prerelease.*/prerelease\": \"${{ github.event.inputs.prerelease }}\"/" versions.json
+          cat versions.json
+          echo "bash update_wesql.sh"
+          
+          echo "docker login --username *** --password *** ***"
+          
+          WESQL_VERSION_CENTOS=""
+          if [[ -z "${{ github.event.inputs.prerelease }}" ]];then
+            WESQL_VERSION_CENTOS=${{ github.event.inputs.centos_version }}
+          else
+            WESQL_VERSION_CENTOS="${{ github.event.inputs.centos_version }}.${{ github.event.inputs.prerelease }}"
+          fi
+          
+          echo "BUILDX_PLATFORMS=${{ github.event.inputs.buildx_platform }} \
+            IMG=${{ github.event.inputs.img }} \
+            WESQL_VERSION_CENTOS=$WESQL_VERSION_CENTOS \
+            make docker-push"

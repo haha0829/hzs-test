@@ -1,0 +1,37 @@
+name: RELEASE-RPM
+
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: 'prerelease'
+        required: true
+        default: '1'
+      date:
+        description: 'date'
+        required: true
+        default: '1'
+      snapshot:
+        description: 'snapshot'
+        required: true
+        default: '1'
+
+
+jobs:
+  release-rpm:
+    name: release rpm
+    runs-on: ubuntu-latest
+    steps:
+      - name: rpm build
+        run: |
+          echo "git config --global --add safe.directory ${{ github.workspace }}"
+          
+          echo "sudo rm -rf ${{ github.workspace }}/../rpm/*"
+          
+          echo "cd packaging/build-wesql"
+          
+          echo "sudo ./rpm_build.sh --builddir=${{ github.workspace }}/.. \
+            --source_code=wesql-server \
+            --build_rpm=1 --prerelease=${{ github.event.inputs.prerelease }} \
+            --date=${{ github.event.inputs.date }} \
+            --snapshot=${{ github.event.inputs.snapshot }}"
