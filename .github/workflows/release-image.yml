@@ -50,7 +50,7 @@ jobs:
           sed -i "9s/version.*/version\": \"${{ github.event.inputs.centos_version }}\",/" versions.json
           sed -i "12s/version.*/version\": \"${{ github.event.inputs.version }}\"/" versions.json
           bash update_wesql.sh
-          
+          cat versions.json
           docker login --username ${{ secrets.DOCKER_REGISTRY_USER }} \
             --password ${{ secrets.DOCKER_REGISTRY_PASSWORD }} \
             ${{ env.DOCKER_REGISTRY_URL }}
