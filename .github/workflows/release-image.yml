@@ -22,7 +22,7 @@ on:
       img:
         description: 'docker image'
         required: true
-        default: 'apecloud/wesql-server'
+        default: 'jashbook/wesql-server'
 
 env:
   DOCKER_REGISTRY_URL: docker.io
