@@ -6,7 +6,7 @@ on:
 jobs:
   make-build:
     if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
-    runs-on: [ self-hosted, "${{ github.actor }}" ]
+    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
     steps:
       - uses: actions/checkout@v3
       - name: make build
@@ -16,7 +16,7 @@ jobs:
           make
   make-test:
     if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
-    runs-on: [ self-hosted, "${{ github.actor }}" ]
+    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
     needs: [make-build]
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
           path: cover.html
   helm-test:
     if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
-    runs-on: [ self-hosted, "${{ github.actor }}" ]
+    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
     needs: [ make-test ]
     steps:
       - uses: actions/checkout@v3
