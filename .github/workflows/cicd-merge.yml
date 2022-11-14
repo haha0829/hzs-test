@@ -5,37 +5,35 @@ on:
     types:
       - closed
 
+env:
+  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  GO_VERSION: '1.19'
+
+
 jobs:
-  make-build:
+  minikube-test:
     if: github.event.pull_request.merged == true
-    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
+    runs-on: ubuntu-latest
+    name: make test in minikube
     steps:
       - uses: actions/checkout@v3
-      - name: make build
-        run: |
-          make mod-vendor
-          make lint
-          make
-  make-test:
-    if: github.event.pull_request.merged == true
-    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
-    needs: [ make-build ]
-    steps:
-      - uses: actions/checkout@v3
-      - name: make test
-        run: |
-          make test
-      - name: upload cover result
-        uses: actions/upload-artifact@v3
+      - name: setup Go
+        uses: actions/setup-go@v3
         with:
-          name: cover_result
-          path: cover.html
-  helm-test:
-    if: github.event.pull_request.merged == true
-    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
-    needs: [ make-test ]
-    steps:
-      - uses: actions/checkout@v3
-      - name: helm test
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: setup minikube
+      - run: |
+          make minikube-start
+
+      - name: checkout testinfra
+        uses: actions/checkout@v3
+        with:
+          repository: linghan-hub/testinfra
+          path: testinfra
+          token: ${{ env.GITHUB_TOKEN }}
+
+      - name: run test
         run: |
-          make helm-test
+          cd testinfra
+          make test
