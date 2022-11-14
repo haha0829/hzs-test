@@ -37,11 +37,9 @@ jobs:
 
       - name: install dbaas
         run: |
-          RELEASE_VERSION=""
-          if [[ -z "${{ github.event.inputs.release_version }}" ]];then
+          RELEASE_VERSION=${{ github.event.inputs.release_version }}
+          if [[ -z "$RELEASE_VERSION" ]];then
             RELEASE_VERSION=`bash ${{ github.workspace }}/.github/utils/release-version.sh ${{ env.GITHUB_TOKEN }}`
-          else
-            RELEASE_VERSION=${{ github.event.inputs.release_version }}
           fi
           echo "RELEASE_VERSION:"$RELEASE_VERSION
           
@@ -95,11 +93,9 @@ jobs:
 
       - name: install dbaas
         run: |
-          RELEASE_VERSION=""
-          if [[ -z "${{ github.event.inputs.release_version }}" ]];then
+          RELEASE_VERSION=${{ github.event.inputs.release_version }}
+          if [[ -z "$RELEASE_VERSION" ]];then
             RELEASE_VERSION=`bash ${{ github.workspace }}/.github/utils/release-version.sh ${{ env.GITHUB_TOKEN }}`
-          else
-            RELEASE_VERSION=${{ github.event.inputs.release_version }}
           fi
           echo "RELEASE_VERSION:"$RELEASE_VERSION
           
