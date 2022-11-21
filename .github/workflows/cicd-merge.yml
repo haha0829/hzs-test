@@ -5,9 +5,6 @@ on:
     types:
       - closed
 
-env:
-  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
 
 jobs:
   minikube-test:
@@ -21,19 +18,11 @@ jobs:
         with:
           go-version: '1.19'
 
-      - name: setup minikube
+      - name: start minikube
         run: |
           sed -i "s/--cpus=4/--cpus=2/" ./Makefile
           make minikube-start
 
-      - name: checkout testinfra
-        uses: actions/checkout@v3
-        with:
-          repository: linghan-hub/testinfra
-          path: testinfra
-          token: ${{ env.GITHUB_TOKEN }}
-
-      - name: run test
+      - name: make test
         run: |
-          cd testinfra
           make test
