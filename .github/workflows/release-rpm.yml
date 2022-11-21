@@ -15,6 +15,14 @@ on:
         description: 'snapshot'
         required: true
         default: '1'
+      without_test:
+        description: 'without test'
+        required: false
+        default: '1'
+      without_debug:
+        description: 'without debug'
+        required: false
+        default: '1'
 
 
 jobs:
@@ -34,4 +42,6 @@ jobs:
             --source_code=wesql-server \
             --build_rpm=1 --prerelease=${{ github.event.inputs.prerelease }} \
             --date=${{ github.event.inputs.date }} \
-            --snapshot=${{ github.event.inputs.snapshot }}"
+            --snapshot=${{ github.event.inputs.snapshot }} \
+            --without_test=${{ github.event.inputs.without_test }} \
+            --without_debug=${{ github.event.inputs.without_debug }}"

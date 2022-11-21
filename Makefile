@@ -272,3 +272,92 @@ helm-test:
 	helm upgrade --install --create-namespace kube-operator deploy/helm -n github-runner  -f ./deploy/helm/ci/ci-values.yaml
 	helm test kube-operator -n github-runner --logs
 	helm uninstall kube-operator -n github-runner
+
+
+.PHONY: minikube
+minikube: ## Download minikube locally if necessary.
+ifeq (, $(shell which minikube))
+	@{ \
+	set -e ;\
+	echo 'installing minikube' ;\
+	curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-$(GOOS)-$(GOARCH) && chmod +x minikube && sudo mv minikube /usr/local/bin ;\
+	echo 'Successfully installed' ;\
+	}
+endif
+MINIKUBE=$(shell which minikube)
+
+
+.PHONY: brew-install-prerequisite
+brew-install-prerequisite: ## Use `brew install` to install required dependencies.
+	brew install go@1.19 kubebuilder delve golangci-lint staticcheck kustomize step cue oras jq yq git-hooks-go
+
+##@ Minikube
+K8S_VERSION ?= v1.22.15
+MINIKUBE_REGISTRY_MIRROR ?= https://tenxhptk.mirror.aliyuncs.com
+MINIKUBE_IMAGE_REPO ?= registry.cn-hangzhou.aliyuncs.com/google_containers
+MINIKUBE_START_ARGS = --memory=4g --cpus=4
+
+KICBASE_IMG=$(MINIKUBE_IMAGE_REPO)/kicbase:v0.0.33
+PAUSE_IMG=$(MINIKUBE_IMAGE_REPO)/pause:3.5
+METRICS_SERVER_IMG=$(MINIKUBE_IMAGE_REPO)/metrics-server:v0.6.1
+CSI_PROVISIONER_IMG=$(MINIKUBE_IMAGE_REPO)/csi-provisioner:v2.1.0
+CSI_ATTACHER_IMG=$(MINIKUBE_IMAGE_REPO)/csi-attacher:v3.1.0
+CSI_EXT_HMC_IMG=$(MINIKUBE_IMAGE_REPO)/csi-external-health-monitor-controller:v0.2.0
+CSI_EXT_HMA_IMG=$(MINIKUBE_IMAGE_REPO)/csi-external-health-monitor-agent:v0.2.0
+CSI_NODE_DRIVER_REG_IMG=$(MINIKUBE_IMAGE_REPO)/csi-node-driver-registrar:v2.0.1
+LIVENESSPROBE_IMG=$(MINIKUBE_IMAGE_REPO)/livenessprobe:v2.2.0
+CSI_RESIZER_IMG=$(MINIKUBE_IMAGE_REPO)/csi-resizer:v1.1.0
+CSI_SNAPSHOTTER_IMG=$(MINIKUBE_IMAGE_REPO)/csi-snapshotter:v4.0.0
+HOSTPATHPLUGIN_IMG=$(MINIKUBE_IMAGE_REPO)/hostpathplugin:v1.6.0
+STORAGE_PROVISIONER_IMG=$(MINIKUBE_IMAGE_REPO)/storage-provisioner:v5
+SNAPSHOT_CONTROLLER_IMG=$(MINIKUBE_IMAGE_REPO)/snapshot-controller:v4.0.0
+
+.PHONY: pull-all-images
+pull-all-images: # Pull required container images
+	docker pull -q $(PAUSE_IMG) &
+	docker pull -q $(HOSTPATHPLUGIN_IMG) &
+	docker pull -q $(LIVENESSPROBE_IMG) &
+	docker pull -q $(CSI_PROVISIONER_IMG) &
+	docker pull -q $(CSI_ATTACHER_IMG) &
+	docker pull -q $(CSI_RESIZER_IMG) &
+	docker pull -q $(CSI_RESIZER_IMG) &
+	docker pull -q $(CSI_SNAPSHOTTER_IMG) &
+	docker pull -q $(SNAPSHOT_CONTROLLER_IMG) &
+	docker pull -q $(CSI_EXT_HMC_IMG) &
+	docker pull -q $(CSI_NODE_DRIVER_REG_IMG) &
+	docker pull -q $(STORAGE_PROVISIONER_IMG) &
+	docker pull -q $(METRICS_SERVER_IMG) &
+	docker pull -q $(KICBASE_IMG)
+
+.PHONY: minikube-start
+# minikube-start: IMG_CACHE_CMD=ssh --native-ssh=false docker pull
+minikube-start: IMG_CACHE_CMD=image load --daemon=true
+minikube-start: pull-all-images minikube ## Start minikube cluster.
+ifneq (, $(shell which minikube))
+ifeq (, $(shell $(MINIKUBE) status -n minikube -ojson | jq -r '.Host' | grep Running))
+	$(MINIKUBE) start --kubernetes-version=$(K8S_VERSION) --registry-mirror=$(REGISTRY_MIRROR) --image-repository=$(MINIKUBE_IMAGE_REPO) $(MINIKUBE_START_ARGS)
+endif
+endif
+	$(MINIKUBE) update-context
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(HOSTPATHPLUGIN_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(LIVENESSPROBE_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(CSI_PROVISIONER_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(CSI_ATTACHER_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(CSI_RESIZER_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(CSI_SNAPSHOTTER_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(CSI_EXT_HMA_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(CSI_EXT_HMC_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(CSI_NODE_DRIVER_REG_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(STORAGE_PROVISIONER_IMG)
+	$(MINIKUBE) $(IMG_CACHE_CMD) $(METRICS_SERVER_IMG)
+	$(MINIKUBE) addons enable metrics-server
+	$(MINIKUBE) addons enable volumesnapshots
+	$(MINIKUBE) addons enable csi-hostpath-driver
+	kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+	kubectl patch storageclass csi-hostpath-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+	kubectl patch volumesnapshotclass/csi-hostpath-snapclass --type=merge -p '{"metadata": {"annotations": {"snapshot.storage.kubernetes.io/is-default-class": "true"}}}'
+
+
+.PHONY: minikube-delete
+minikube-delete: minikube ## Delete minikube cluster.
+	$(MINIKUBE) delete
