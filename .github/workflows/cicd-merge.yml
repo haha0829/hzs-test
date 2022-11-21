@@ -11,7 +11,7 @@ env:
 
 jobs:
   minikube-test:
-    if: ${{ github.event.pull_request.merged == true &&  github.ref == 'refs/heads/main' }}
+    if: ${{ github.event.pull_request.merged == true &&  github.base_ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     name: make test in minikube
     steps:
