@@ -295,7 +295,7 @@ brew-install-prerequisite: ## Use `brew install` to install required dependencie
 K8S_VERSION ?= v1.22.15
 MINIKUBE_REGISTRY_MIRROR ?= https://tenxhptk.mirror.aliyuncs.com
 MINIKUBE_IMAGE_REPO ?= registry.cn-hangzhou.aliyuncs.com/google_containers
-MINIKUBE_START_ARGS = --memory=4g --cpus=4
+MINIKUBE_START_ARGS = --memory=4g --cpus=2
 
 KICBASE_IMG=$(MINIKUBE_IMAGE_REPO)/kicbase:v0.0.33
 PAUSE_IMG=$(MINIKUBE_IMAGE_REPO)/pause:3.5
