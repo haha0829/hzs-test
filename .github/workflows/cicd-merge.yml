@@ -1,6 +1,7 @@
 name: CICD-MERGE
 
 on:
+  push:
   pull_request:
     types:
       - closed
@@ -14,7 +15,7 @@ env:
 
 jobs:
   minikube-test:
-    if: github.event.pull_request.merged == true
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     name: make test in minikube
     steps:
