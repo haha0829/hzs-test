@@ -4,6 +4,7 @@ on:
   pull_request:
     types:
       - closed
+  workflow_dispatch:
 
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
