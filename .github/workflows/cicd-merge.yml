@@ -1,21 +1,17 @@
 name: CICD-MERGE
 
 on:
-  push:
   pull_request:
     types:
       - closed
-  workflow_dispatch:
 
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-  GO_VERSION: '1.19'
-  TEST_TAG: test
 
 
 jobs:
   minikube-test:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.event.pull_request.merged == true &&  github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     name: make test in minikube
     steps:
@@ -23,10 +19,11 @@ jobs:
       - name: setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version: '1.19'
 
       - name: setup minikube
         run: |
+          sed -i "s/--cpus=4/--cpus=2/" ./Makefile
           make minikube-start
 
       - name: checkout testinfra
