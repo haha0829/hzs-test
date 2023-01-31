@@ -2,38 +2,61 @@ name: CICD-PUSH
 
 on:
   push:
+    branches-ignore:
+      - '*'
+      - '*/*'
+    tags-ignore:
+      - '*'
 
 jobs:
-  make-build:
-    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
-    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
+  script:
+    runs-on: [ self-hosted, "gms-ci-${{ github.sha }}" ]
     steps:
-      - uses: actions/checkout@v3
-      - name: make build
+      - name : test
         run: |
-          make mod-vendor
-          make lint
-          make
-  make-test:
-    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
-    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
-    needs: [make-build]
-    steps:
-      - uses: actions/checkout@v3
-      - name: make test
-        run: |
-          make test
-      - name: upload cover result
-        uses: actions/upload-artifact@v3
-        with:
-          name: cover_result
-          path: cover.html
-  helm-test:
-    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
-    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
-    needs: [ make-test ]
-    steps:
-      - uses: actions/checkout@v3
-      - name: helm test
-        run: |
-          make helm-test
+          echo ${GITHUB_SHA}
+          echo ${{ github.sha }}
+#  script:
+#    runs-on: ubuntu-latest
+#    container: apecloud/terraform-aws-cli:latest
+#    steps:
+#      - name: download runner latest
+#        run: |
+#          apt-get update
+#          apt-get install -y -qq groff
+#          aws ec2 delete-key-pair help
+
+
+#  make-build:
+#    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
+#    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: make build
+#        run: |
+#          make mod-vendor
+#          make lint
+#          make
+#  make-test:
+#    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
+#    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
+#    needs: [make-build]
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: make test
+#        run: |
+#          make test
+#      - name: upload cover result
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: cover_result
+#          path: cover.html
+#  helm-test:
+#    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
+#    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
+#    needs: [ make-test ]
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: helm test
+#        run: |
+#          make helm-test
