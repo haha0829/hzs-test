@@ -2,6 +2,7 @@ name: RELEASE-PUBILSH
 
 on:
   release:
+    types: [ released, prereleased ]
 
 jobs:
   build:
