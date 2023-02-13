@@ -3,6 +3,7 @@ name: RELEASE-CREATE
 on:
   push:
     tags:
+      - v*
 
 jobs:
   publish:
