@@ -21,7 +21,7 @@ EOF
 }
 
 GITHUB_API="https://api.github.com"
-KUBEBLOCKS_REPO=JashBook/hzs-test
+LATEST_REPO=JashBook/hzs-test
 
 main() {
     local TYPE
@@ -95,7 +95,7 @@ get_upload_url() {
 }
 
 update_release_latest() {
-    latest_release_tag=`gh_curl -s $GITHUB_API/repos/$KUBEBLOCKS_REPO/releases/latest | jq -r '.tag_name'`
+    latest_release_tag=`gh_curl -s $GITHUB_API/repos/$LATEST_REPO/releases/latest | jq -r '.tag_name'`
 
     release_id=`gh_curl -s $GITHUB_API/repos/$GITHUB_REPO/releases/tags/$latest_release_tag | jq -r '.id'`
 

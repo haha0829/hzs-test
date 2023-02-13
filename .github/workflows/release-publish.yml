@@ -21,7 +21,7 @@ jobs:
             --type 4 \
             --tag-name ${{ env.TAG_NAME }} \
             --github-repo ${{ env.CLI_REPO }} \
-            --github-token ${{ secrets.GITLAB_ACCESS_TOKEN }}
+            --github-token ${{ env.GITHUB_TOKEN }}
 
 
 
