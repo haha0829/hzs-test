@@ -2,7 +2,7 @@ name: CICD-PULL-REQUEST
 
 on:
   push:
-    branches:
+    branches-ignore:
       - '*'
       - '*/*'
     tags-ignore:
@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Deploy
         run: |
-          echo "${{ needs.init-gm.outputs.cn-account }}"
+          echo "${{ needs.init.outputs.cn-account }}"
 
   deploy-2:
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
     steps:
       - name: Deploy
         run: |
-          echo "${{ needs.init-gm.outputs.cn-account }}"
+          echo "${{ needs.init.outputs.cn-account }}"
 
 
  
