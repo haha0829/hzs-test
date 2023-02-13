@@ -3,18 +3,18 @@ name: RELEASE-PUBILSH
 on:
   release:
     types:
-      - edited
+      - published
 
 jobs:
   build:
-    name: Upload Release Asset
+    name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: echo release
         run:
-          echo ${{ github.ref_name }}
-          echo ${{ github.event.release }}
-          echo ${{ github.event.release.prerelease }}
+          echo "${{ github.ref_name }}"
+          echo "${{ github.event.release }}"
+          echo "${{ github.event.release.prerelease }}"
 
 
 #      - name: Build project
