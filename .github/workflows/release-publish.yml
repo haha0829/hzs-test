@@ -7,21 +7,22 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
   TAG_NAME: ${{ github.ref_name }}
-  CLI_REPO: 'apecloud/kbcli'
+  CLI_REPO: 'JashBook/hzs-test'
 
 jobs:
-  update-release-kbcli:
-    name: Update Release kbcli
+  update-release:
+    name: Update Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: update release ${{ env.CLI_NAME }} latest
         run: |
-          bash ${{ github.workspace }}/.github/utils/utils.sh \
-            --type 4 \
-            --tag-name ${{ env.TAG_NAME }} \
-            --github-repo ${{ env.CLI_REPO }} \
-            --github-token ${{ env.GITHUB_TOKEN }}
+          echo "test"
+#          bash ${{ github.workspace }}/.github/utils/utils.sh \
+#            --type 4 \
+#            --tag-name ${{ env.TAG_NAME }} \
+#            --github-repo ${{ env.CLI_REPO }} \
+#            --github-token ${{ env.GITHUB_TOKEN }}
 
 
 
