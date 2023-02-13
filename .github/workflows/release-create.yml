@@ -1,0 +1,17 @@
+name: RELEASE-CREATE
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  publish:
+    name: create a release
+    runs-on: ubuntu-latest
+    steps:
+      - name: release without release notes
+        uses: softprops/action-gh-release@v1
+        with:
+          name: KubeBlocks ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}

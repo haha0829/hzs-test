@@ -2,7 +2,7 @@ name: RELEASE-PUBILSH
 
 on:
   release:
-    types: [ published,edited ]
+    types: [ edited ]
 
 jobs:
   build:
