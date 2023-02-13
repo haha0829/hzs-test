@@ -3,7 +3,7 @@ name: RELEASE-PUBILSH
 on:
   release:
     types:
-      - published
+      - released
 
 jobs:
   build:
