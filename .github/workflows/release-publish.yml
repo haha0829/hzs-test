@@ -3,7 +3,7 @@ name: RELEASE-PUBILSH
 on:
   release:
     types:
-      - published
+      - edited
 
 jobs:
   build:
@@ -13,8 +13,9 @@ jobs:
       - name: Checkout code
         run:
           echo ${{ github.ref_name }}
-        if: |
-          github.event.action == 'published' && !github.event.release.prerelease
+          echo ${{ github.event.release }}
+          echo ${{ github.event.release.prerelease }}
+
 
 #      - name: Build project
 #        run: |
