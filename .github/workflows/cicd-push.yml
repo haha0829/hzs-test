@@ -11,10 +11,13 @@ on:
 jobs:
   script:
     runs-on: ubuntu-latest
+    container: centos:7
     steps:
       - name : test
         run: |
-          skopeo sync -h
+          yum -y install skopeo
+          skopeo -h
+          
 
 
 #  script:
