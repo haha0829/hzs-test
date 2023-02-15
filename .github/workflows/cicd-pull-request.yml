@@ -2,11 +2,7 @@ name: CICD-PULL-REQUEST
 
 on:
   pull-request:
-    branches-ignore:
-      - '*'
-      - '*/*'
-    tags-ignore:
-      - '*'
+
 
 jobs:
   init:
