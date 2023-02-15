@@ -6,10 +6,12 @@ on:
 jobs:
   script:
     runs-on: ubuntu-latest
+    container: centos:7
     steps:
       - uses: actions/checkout@v3
       - name : skopeo sync images
         run: |
+          sudo yum -y install skopeo
           skopeo sync -h
           bash ${{ github.workspace }}/.github/utils/skopeo_copy.sh \
             "${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_PASSWORD }}" \
