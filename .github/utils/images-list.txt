@@ -1,4 +1,3 @@
-apecloud/foxlake
 apecloud/prometheus
 apecloud/node-exporter
 apecloud/alertmanager
