@@ -2,7 +2,7 @@ name: CICD-PUSH
 
 on:
   push:
-    branches-ignore:
+    branches:
       - '*'
       - '*/*'
     tags-ignore:
@@ -17,8 +17,8 @@ jobs:
           fetch-depth: 2
       - name : test
         run: |
-          FILE_PATH=`git diff --name-only HEAD HEAD^`
-          echo "$FILE_PATH"
+          sudo apt-get update
+          sudo apt-get -y install skopeo
 
 
 #  script:

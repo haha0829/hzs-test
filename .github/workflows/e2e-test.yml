@@ -1,6 +1,5 @@
 name: E2E-TEST
 on:
-  push:
   workflow_dispatch:
     inputs:
       release_version:
