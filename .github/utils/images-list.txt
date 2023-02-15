@@ -1,12 +1,3 @@
-apecloud/prometheus
-apecloud/node-exporter
-apecloud/alertmanager
-apecloud/loadbalancer
-apecloud/nyancat
-apecloud/foxlake-devtools
-apecloud/github-runner
-apecloud/terraform-aws-cli
-apecloud/galaxysql-devtools
 apecloud/wesql-server
 apecloud/kubeblocks-dev
 apecloud/kbprobe
