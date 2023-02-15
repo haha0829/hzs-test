@@ -1,9 +1,1 @@
-apecloud/wesql-server
-apecloud/kubeblocks-dev
-apecloud/kbprobe
-apecloud/prometheus-config-reloader
-apecloud/k8s-sidecar
-apecloud/prometheus-operator
-apecloud/k3d-tools
-apecloud/k3d-proxy
-apecloud/kube-rbac-proxy
+apecloud/foxlake
