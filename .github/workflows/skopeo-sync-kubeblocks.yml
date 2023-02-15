@@ -1,0 +1,19 @@
+name: skopeo sync kubeblocks
+
+on:
+  workflow_dispatch:
+
+jobs:
+  script:
+    runs-on: ubuntu-latest
+    steps:
+      - name : skopeo sync kubeblocks
+        run: |
+          skopeo sync -h
+          skopeo sync --all \
+            --src-creds "${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_PASSWORD }}" \
+            --dest-creds "${{ secrets.ALIYUN_USER }}:${{ secrets.ALIYUN_PASSWORD }}" \
+            --src docker \
+            --dest docker \
+            docker.io/apecloud/kubeblocks \
+            registry.cn-hangzhou.aliyuncs.com/apecloud
