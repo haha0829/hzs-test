@@ -6,14 +6,15 @@ on:
       sync_flag:
         description: 'sync flag'
         required: false
-        default: ''
+        default: '1'
 jobs:
   script:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name : skopeo sync kubeblocks
         run: |
+          brew install skopeo
           skopeo sync -h
           if [[ ! -z "${{ github.event.inputs.sync_flag }}" ]];then
             bash ${{ github.workspace }}/.github/utils/skopeo_copy.sh \
