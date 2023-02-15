@@ -2,7 +2,11 @@ name: skopeo sync kubeblocks
 
 on:
   workflow_dispatch:
-
+    inputs:
+      sync_flag:
+        description: 'sync flag'
+        required: false
+        default: ''
 jobs:
   script:
     runs-on: ubuntu-latest
@@ -11,10 +15,18 @@ jobs:
       - name : skopeo sync kubeblocks
         run: |
           skopeo sync -h
-          skopeo sync --all \
-            --src-creds "${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_PASSWORD }}" \
-            --dest-creds "${{ secrets.ALIYUN_USER }}:${{ secrets.ALIYUN_PASSWORD }}" \
-            --src docker \
-            --dest docker \
-            docker.io/apecloud/kubeblocks \
-            registry.cn-hangzhou.aliyuncs.com/apecloud
+          if [[ ! -z "${{ github.event.inputs.sync_flag }}" ]];then
+            bash ${{ github.workspace }}/.github/utils/skopeo_copy.sh \
+              "${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_PASSWORD }}" \
+              "${{ secrets.ALIYUN_USER }}:${{ secrets.ALIYUN_PASSWORD }}" \
+              ${{ github.workspace }}/.github/utils/kubeblocks-list.txt
+          else
+            skopeo sync --all \
+              --src-creds "${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_PASSWORD }}" \
+              --dest-creds "${{ secrets.ALIYUN_USER }}:${{ secrets.ALIYUN_PASSWORD }}" \
+              --src docker \
+              --dest docker \
+              docker.io/apecloud/kubeblocks \
+              registry.cn-hangzhou.aliyuncs.com/apecloud
+          fi
+          
