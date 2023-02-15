@@ -17,9 +17,9 @@ jobs:
           brew install skopeo
           skopeo sync -h
           if [[ ! -z "${{ github.event.inputs.sync_flag }}" ]];then
-            bash ${{ github.workspace }}/.github/utils/skopeo_copy.sh \
-              "${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_PASSWORD }}" \
-              "${{ secrets.ALIYUN_USER }}:${{ secrets.ALIYUN_PASSWORD }}" \
+            bash ${{ github.workspace }}/.github/utils/skopeo_copy_latest.sh \
+              "${{ secrets.DOCKER_USER }}" '${{ secrets.DOCKER_PASSWORD }}' \
+              "${{ secrets.ALIYUN_USER }}" "${{ secrets.ALIYUN_PASSWORD }}" \
               ${{ github.workspace }}/.github/utils/kubeblocks-list.txt
           else
             skopeo sync --all \
