@@ -1,7 +1,7 @@
-docker.io/apecloud/kubeblocks:0.3.8
-docker.io/apecloud/kubeblocks:0.3.7
-docker.io/apecloud/kubeblocks:0.3.6
-docker.io/apecloud/kubeblocks:latest
-docker.io/apecloud/kubeblocks:0.4.0-alpha.0
-docker.io/apecloud/kubeblocks:0.4.0-test.0
-docker.io/apecloud/kubeblocks:0.4.0-test.1
+apecloud/kubeblocks:0.3.8
+apecloud/kubeblocks:0.3.7
+apecloud/kubeblocks:0.3.6
+apecloud/kubeblocks:latest
+apecloud/kubeblocks:0.4.0-alpha.0
+apecloud/kubeblocks:0.4.0-test.0
+apecloud/kubeblocks:0.4.0-test.1
