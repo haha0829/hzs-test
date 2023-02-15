@@ -15,15 +15,13 @@ jobs:
       - name : test
         run: |
           skopeo sync -h
-#          skopeo sync --all \
-#            --src-username "${{ secrets.DOCKER_USER }}" \
-#            --src-password "${{ secrets.DOCKER_PASSWORD }}" \
-#            --dest-username "${{ secrets.ALIYUN_USER }}" \
-#            --dest-password "${{ secrets.ALIYUN_PASSWORD }}" \
-#            --src docker \
-#            --dest docker \
-#            docker.io/apecloud/kubeblocks \
-#            registry.cn-hangzhou.aliyuncs.com/apecloud
+          skopeo sync --all \
+            --src-creds "${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_PASSWORD }}" \
+            --dest-creds "${{ secrets.ALIYUN_USER }}:${{ secrets.ALIYUN_PASSWORD }}" \
+            --src docker \
+            --dest docker \
+            docker.io/apecloud/kubeblocks \
+            registry.cn-hangzhou.aliyuncs.com/apecloud
 
 
 #  script:
