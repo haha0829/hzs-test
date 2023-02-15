@@ -10,6 +10,7 @@ jobs:
       - uses: actions/checkout@v3
       - name : skopeo sync images
         run: |
+          brew install skopeo
           skopeo sync -h
           bash ${{ github.workspace }}/.github/utils/skopeo_copy.sh \
             "${{ secrets.DOCKER_USER }}:${{ secrets.DOCKER_PASSWORD }}" \
