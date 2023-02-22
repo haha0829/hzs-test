@@ -13,9 +13,12 @@ jobs:
     runs-on: macos-latest
     steps:
       - name : test
+        shell: bash
         run: |
-          brew install skopeo
-          skopeo sync -h
+          TAG_NAME="v0.14.1"
+          echo "${TAG_NAME/v/}"
+#          brew install skopeo
+#          skopeo sync -h
           
 
 
