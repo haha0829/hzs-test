@@ -15,6 +15,7 @@ jobs:
       - name : test
         shell: bash
         run: |
+          go version
           TAG_NAME="v0.14.1"
           echo "${TAG_NAME/v/}"
 #          brew install skopeo
