@@ -18,6 +18,8 @@ jobs:
           go version
           TAG_NAME="v0.14.1"
           echo "${TAG_NAME/v/}"
+          CHAR_PATH="deploy/helm"
+          echo "${CHAR_PATH%/*}"
 #          brew install skopeo
 #          skopeo sync -h
           
