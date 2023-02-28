@@ -1,0 +1,30 @@
+name: RELEASE-VERSION
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The tag name of release'
+        required: true
+        default: ''
+      branch:
+        description: 'The ref branch of tag (default: main)'
+        required: true
+        default: 'main'
+
+run-name: ${{ inputs.branch }}:${{ inputs.version }}
+
+
+jobs:
+  release-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout ${{ inputs.branch_name }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: push tag
+        run: |
+          git tag ${{ inputs.version }}
+          git push origin ${{ inputs.version }}
