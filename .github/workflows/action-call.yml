@@ -21,4 +21,5 @@ jobs:
       - name: push tag
         run: |
           echo "${{ inputs.release_version }}"
-
+          git tag ${{ inputs.release_version }}
+          git push origin ${{ inputs.release_version }}
