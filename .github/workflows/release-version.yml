@@ -8,15 +8,14 @@ on:
         required: true
         default: ''
 
-
-run-name: ${{ github.ref }}:${{ inputs.release_version }}
+run-name: ref_name:${{ github.ref_name }} release_version:${{ inputs.release_version }}
 
 
 jobs:
   release-version:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout ${{ github.ref }}
+      - name: checkout branch ${{ github.ref_name }}
         uses: actions/checkout@v3
 
       - name: push tag
