@@ -28,12 +28,12 @@ jobs:
         shell: bash
         run: |
           echo "${{ inputs.params }}"
-      - name : docs
+      - name : docker
         if: ${{ inputs.params == *'docker'* }}
         shell: bash
         run: |
           echo "${{ inputs.params }}"
-      - name : docs
+      - name : all
         if: ${{ inputs.params == *'all'* }}
         shell: bash
         run: |
