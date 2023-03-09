@@ -19,22 +19,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name : docs
-        if: ${{ inputs.params == *'docs'* }}
+        if: contains(inputs.params, 'docs')
         shell: bash
         run: |
           echo "${{ inputs.params }}"
       - name : github
-        if: ${{ inputs.params == *'.github'* }}
+        if: contains(inputs.params, '.github')
         shell: bash
         run: |
           echo "${{ inputs.params }}"
       - name : docker
-        if: ${{ inputs.params == *'docker'* }}
+        if: contains(inputs.params, 'docker')
         shell: bash
         run: |
           echo "${{ inputs.params }}"
       - name : all
-        if: ${{ inputs.params == *'all'* }}
+        if: contains(inputs.params, 'all')
         shell: bash
         run: |
           echo "${{ inputs.params }}"
