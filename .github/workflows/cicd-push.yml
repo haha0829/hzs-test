@@ -15,38 +15,50 @@ on:
       - '*'
 
 jobs:
+  trigger-mode:
+    runs-on: ubuntu-latest
+    outputs:
+      trigger-mode: ${{ steps.get_trigger_mode.outputs.trigger_mode }}
+    steps:
+      - name: Get trigger mode
+        id: get_trigger_mode
+        run: |
+          TRIGGER_MODE="${{ inputs.params }}"
+          echo trigger_mode=$TRIGGER_MODE >> $GITHUB_OUTPUT
+
   script:
+    needs: trigger-mode
     runs-on: ubuntu-latest
     steps:
       - name : docs
-        if: contains(inputs.params, 'docs')
+        if: contains(needs.trigger-mode.outputs.trigger-mode, '|docs')
         shell: bash
         run: |
-          echo "${{ inputs.params }}"
+          echo "${{ needs.trigger-mode.outputs.trigger-mode }}"
       - name : github
-        if: contains(inputs.params, '.github')
+        if: contains(needs.trigger-mode.outputs.trigger-mode, '|.github')
         shell: bash
         run: |
-          echo "${{ inputs.params }}"
+          echo "${{ needs.trigger-mode.outputs.trigger-mode }}"
       - name : docker
-        if: contains(inputs.params, 'docker')
+        if: contains(needs.trigger-mode.outputs.trigger-mode, '|docker')
         shell: bash
         run: |
-          echo "${{ inputs.params }}"
+          echo "${{ needs.trigger-mode.outputs.trigger-mode }}"
       - name : all
-        if: contains(inputs.params, 'all')
+        if: contains(needs.trigger-mode.outputs.trigger-mode, '|all')
         shell: bash
         run: |
-          echo "${{ inputs.params }}"
-#          cr --help
-#          go version
-#          TAG_NAME="v0.14.1"
-#          echo "${TAG_NAME/v/}"
-#          CHAR_PATH="deploy/helm"
-#          echo "${CHAR_PATH%/*}"
-#          brew install skopeo
-#          skopeo sync -h
-          
+          echo "${{ needs.trigger-mode.outputs.trigger-mode }}"
+          #          cr --help
+          #          go version
+          #          TAG_NAME="v0.14.1"
+          #          echo "${TAG_NAME/v/}"
+          #          CHAR_PATH="deploy/helm"
+          #          echo "${CHAR_PATH%/*}"
+          #          brew install skopeo
+          #          skopeo sync -h
+
 
 
 #  script:
