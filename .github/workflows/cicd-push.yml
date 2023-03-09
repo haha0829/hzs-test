@@ -1,6 +1,12 @@
 name: CICD-PUSH
 
 on:
+  workflow_dispatch:
+    inputs:
+      params:
+        description: 'params'
+        required: false
+        default: ''
   push:
     branches:
       - '*'
@@ -10,16 +16,34 @@ on:
 
 jobs:
   script:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
-      - name : test
+      - name : docs
+        if: contains(inputs.params, 'docs')
         shell: bash
         run: |
-          go version
-          TAG_NAME="v0.14.1"
-          echo "${TAG_NAME/v/}"
-          CHAR_PATH="deploy/helm"
-          echo "${CHAR_PATH%/*}"
+          echo "${{ inputs.params }}"
+      - name : github
+        if: contains(inputs.params, '.github')
+        shell: bash
+        run: |
+          echo "${{ inputs.params }}"
+      - name : docker
+        if: contains(inputs.params, 'docker')
+        shell: bash
+        run: |
+          echo "${{ inputs.params }}"
+      - name : all
+        if: contains(inputs.params, 'all')
+        shell: bash
+        run: |
+          echo "${{ inputs.params }}"
+#          cr --help
+#          go version
+#          TAG_NAME="v0.14.1"
+#          echo "${TAG_NAME/v/}"
+#          CHAR_PATH="deploy/helm"
+#          echo "${CHAR_PATH%/*}"
 #          brew install skopeo
 #          skopeo sync -h
           
