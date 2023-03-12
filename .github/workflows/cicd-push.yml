@@ -1,12 +1,6 @@
 name: CICD-PUSH
 
 on:
-  workflow_dispatch:
-    inputs:
-      params:
-        description: 'params'
-        required: false
-        default: ''
   push:
     branches:
       - '*'
@@ -14,94 +8,56 @@ on:
     tags-ignore:
       - '*'
 
+
 jobs:
   trigger-mode:
     runs-on: ubuntu-latest
     outputs:
       trigger-mode: ${{ steps.get_trigger_mode.outputs.trigger_mode }}
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
       - name: Get trigger mode
         id: get_trigger_mode
         run: |
-          TRIGGER_MODE="${{ inputs.params }}"
+          TRIGGER_MODE=`bash .github/utils/utils.sh --type 6`
+          echo $TRIGGER_MODE
           echo trigger_mode=$TRIGGER_MODE >> $GITHUB_OUTPUT
 
-  script:
+  pre-push:
     needs: trigger-mode
     runs-on: ubuntu-latest
+    name: Push Pre-Check
     steps:
-      - name : docs
-        if: contains(needs.trigger-mode.outputs.trigger-mode, '|docs')
-        shell: bash
-        run: |
-          echo "${{ needs.trigger-mode.outputs.trigger-mode }}"
-      - name : github
-        if: contains(needs.trigger-mode.outputs.trigger-mode, '|.github')
-        shell: bash
-        run: |
-          echo "${{ needs.trigger-mode.outputs.trigger-mode }}"
-      - name : docker
-        if: contains(needs.trigger-mode.outputs.trigger-mode, '|docker')
-        shell: bash
-        run: |
-          echo "${{ needs.trigger-mode.outputs.trigger-mode }}"
-      - name : all
-        if: contains(needs.trigger-mode.outputs.trigger-mode, '|all')
-        shell: bash
-        run: |
-          echo "${{ needs.trigger-mode.outputs.trigger-mode }}"
-          #          cr --help
-          #          go version
-          #          TAG_NAME="v0.14.1"
-          #          echo "${TAG_NAME/v/}"
-          #          CHAR_PATH="deploy/helm"
-          #          echo "${CHAR_PATH%/*}"
-          #          brew install skopeo
-          #          skopeo sync -h
+      - uses: actions/checkout@v3
+      - name: Spell Check with Typos
+        if: contains(needs.trigger-mode.outputs.trigger-mode, '[docs]')
+        uses: crate-ci/typos@v1.13.14
+        with:
+          files: docs/
+          config: .github/utils/typos.toml
 
+  make-test:
+    needs: trigger-mode
+    runs-on: ubuntu-latest
+    if: contains(needs.trigger-mode.outputs.trigger-mode, '[test]')
+    steps:
+      - name: make test
+        run: echo ${{ needs.trigger-mode.outputs.trigger-mode }}
 
+  check-image:
+    needs: trigger-mode
+    if: contains(needs.trigger-mode.outputs.trigger-mode, '[docker]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: check image
+        run: echo ${{ needs.trigger-mode.outputs.trigger-mode }}
 
-#  script:
-#    runs-on: ubuntu-latest
-#    container: apecloud/terraform-aws-cli:latest
-#    steps:
-#      - name: download runner latest
-#        run: |
-#          apt-get update
-#          apt-get install -y -qq groff
-#          aws ec2 delete-key-pair help
-
-
-#  make-build:
-#    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
-#    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: make build
-#        run: |
-#          make mod-vendor
-#          make lint
-#          make
-#  make-test:
-#    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
-#    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
-#    needs: [make-build]
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: make test
-#        run: |
-#          make test
-#      - name: upload cover result
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: cover_result
-#          path: cover.html
-#  helm-test:
-#    if: startsWith(github.event.head_commit.message, 'Merge pull request') != true
-#    runs-on: [ self-hosted, aws-ec2-k8s-runner ]
-#    needs: [ make-test ]
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: helm test
-#        run: |
-#          make helm-test
+  check-helm:
+    needs: trigger-mode
+    if: contains(needs.trigger-mode.outputs.trigger-mode, '[deploy]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: check helm
+        run: echo ${{ needs.trigger-mode.outputs.trigger-mode }}

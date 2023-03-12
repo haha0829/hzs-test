@@ -5,38 +5,42 @@ on:
 
 
 jobs:
-  init:
+  trigger-mode:
+    name: make test
     runs-on: ubuntu-latest
     outputs:
-      cn-account: ${{ steps.cn-account.outputs.cn-account }}
+      trigger-mode: ${{ steps.get_trigger_mode.outputs.trigger_mode }}
     steps:
-      - name: Init
-        id: cn-account
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Get trigger mode
+        id: get_trigger_mode
         run: |
-          CN_ACCOUNT="Root user for with password: root && xhsjyd\nEncrypted password for:"
-          echo "1$CN_ACCOUNT"
-          CN_ACCOUNT=${CN_ACCOUNT#*"Root user for with password: "}
-          CN_ACCOUNT=${CN_ACCOUNT%"Encrypted password for:"*}
-          echo "2$CN_ACCOUNT"
-          CN_ACCOUNT=${CN_ACCOUNT%"\\"*}
-          echo "3$CN_ACCOUNT"
-          echo 'cn-account='"$CN_ACCOUNT" >> $GITHUB_OUTPUT
+          TRIGGER_MODE=`bash .github/utils/utils.sh --type 6`
+          echo $TRIGGER_MODE
+          echo trigger_mode=$TRIGGER_MODE >> $GITHUB_OUTPUT
 
-  deploy:
+  make-test:
+    needs: trigger-mode
+    if: contains(needs.trigger-mode.outputs.trigger-mode, '[test]')
     runs-on: ubuntu-latest
-    needs: init
     steps:
-      - name: Deploy
-        run: |
-          echo "${{ needs.init.outputs.cn-account }}"
+      - name: make test
+        run: echo ${{ needs.trigger-mode.outputs.trigger-mode }}
 
-  deploy-2:
+  check-image:
+    needs: trigger-mode
+    if: needs.trigger-mode.outputs.trigger-mode == '[docker]'
     runs-on: ubuntu-latest
-    needs: [ init,deploy ]
     steps:
-      - name: Deploy
-        run: |
-          echo "${{ needs.init.outputs.cn-account }}"
+      - name: check image
+        run: echo ${{ needs.trigger-mode.outputs.trigger-mode }}
 
-
- 
+  check-helm:
+    needs: trigger-mode
+    if: needs.trigger-mode.outputs.trigger-mode == '[deploy]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: check helm
+        run: echo ${{ needs.trigger-mode.outputs.trigger-mode }}
