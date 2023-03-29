@@ -1,0 +1,40 @@
+name: TRIGGER-WORKFLOW
+
+on:
+  workflow_call:
+    inputs:
+      GITHUB_REPO:
+        description: "The github repo that triggers the workflow"
+        type: string
+        required: true
+        default: ''
+      BRANCH_NAME:
+        description: "The branch name that triggers the workflow"
+        type: string
+        required: false
+        default: 'main'
+      WORKFLOW_ID:
+        description: "The workflow id that triggers the workflow"
+        type: string
+        required: true
+        default: ''
+
+
+env:
+  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+jobs:
+  trigger-workflow:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+#      - name: Checkout Code
+#        uses: actions/checkout@v3
+      - name: see code
+        run: |
+          sudo apt-get update
+          sudo apt-get install tree
+          
+          tree /home/runner/
+

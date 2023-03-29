@@ -31,6 +31,7 @@ main() {
     local GITHUB_REPO
     local GITHUB_TOKEN
     local TRIGGER_MODE=""
+    local EXIT_STATUS=0
 
     parse_command_line "$@"
 
@@ -53,12 +54,16 @@ main() {
         6)
             get_trigger_mode
         ;;
+        7)
+            check_image_exists
+        ;;
         *)
             show_help
             break
         ;;
     esac
-
+    echo $EXIT_STATUS
+    exit $EXIT_STATUS
 }
 
 parse_command_line() {
@@ -161,6 +166,33 @@ get_trigger_mode() {
         esac
     done
     echo $TRIGGER_MODE
+}
+
+
+check_image_exists() {
+     image=registry.cn-hangzhou.aliyuncs.com/apecloud/configmap-reload:v0.5.0
+    for i in {1..5}; do
+        architectures=$( docker manifest inspect "$image" | grep architecture )
+        if [[ -z "$architectures" ]]; then
+            if [[ $i -lt 5 ]]; then
+                sleep 1
+                continue
+            fi
+        else
+            if [[ "$architectures" != *"amd64"* ]];then
+                echo "::error title=Missing Amd64 Arch::$image missing amd64 architecture"
+                EXIT_STATUS=1
+            elif [[ "$architectures" != *"arm641"* ]]; then
+                echo "::error title=Missing Arm64 Arch::$image missing arm64 architecture"
+                EXIT_STATUS=1
+            else
+                echo "$image found amd64/arm64 architecture"
+            fi
+            break
+        fi
+        echo "$(tput setaf 1)$image is not exists.$(tput sgr 0)"
+#        EXIT_STATUS=1
+    done
 }
 
 main "$@"
