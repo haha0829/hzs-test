@@ -7,7 +7,7 @@ on:
         description: "Install the specify version of kubectl"
         type: string
         required: false
-        default: ''
+        default: 'latest'
   push:
 #    branches:
 #      - '*'
@@ -46,7 +46,7 @@ jobs:
           aws-region: cn-northwest-1
       - uses: azure/setup-kubectl@v3
         with:
-          version: ${{ inputs.KUBECTL_VERSION }}
+          version: "${{ inputs.KUBECTL_VERSION }}"
       - name: test
         run: |
           aws eks update-kubeconfig --region cn-northwest-1 --name ${EKS_CLUSTER_NAME}
