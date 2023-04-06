@@ -2,6 +2,11 @@ name: CICD-PUSH
 
 on:
   workflow_dispatch:
+    KUBECTL_VERSION:
+      description: "Install the specify version of kubectl"
+      type: string
+      required: false
+      default: ''
   push:
 #    branches:
 #      - '*'
@@ -39,6 +44,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: cn-northwest-1
       - uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ input.KUBECTL_VERSION }}
       - name: test
         run: |
           aws eks update-kubeconfig --region cn-northwest-1 --name ${EKS_CLUSTER_NAME}
