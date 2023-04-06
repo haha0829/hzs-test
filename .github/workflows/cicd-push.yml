@@ -41,14 +41,15 @@ jobs:
       - uses: azure/setup-kubectl@v3
       - name: test
         run: |
-          mkdir -p ~/.kube
-          touch ~/.kube/config
-          echo "${KUBE_CONFIG}" > ~/.kube/config
-          export KUBECONFIG=~/.kube/config
-          TAG_NAME=$( git describe --tags --dirty --always --abbrev=12 )
-          echo "TAG_NAME:"$TAG_NAME 
-          kubectl get pod -A 
-          echo "${{ env.REL_VERSION }}"
+          aws eks update-kubeconfig --region cn-northwest-1 --name ${EKS_CLUSTER_NAME}
+          kubectl get pod -A
+#          mkdir -p ~/.kube
+#          touch ~/.kube/config
+#          echo "${KUBE_CONFIG}" > ~/.kube/config
+#          export KUBECONFIG=~/.kube/config
+#          TAG_NAME=$( git describe --tags --dirty --always --abbrev=12 )
+#          echo "TAG_NAME:"$TAG_NAME
+#          echo "${{ env.REL_VERSION }}"
 #      - uses: actions/checkout@v3
 ##      - uses: uraimo/run-on-arch-action@v2
 ##        name: Run commands
