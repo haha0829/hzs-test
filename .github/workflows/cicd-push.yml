@@ -11,7 +11,7 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
   REL_VERSION: ${GITHUB_REF/refs\/heads\//}
-  KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
+  KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
 
 jobs:
   #  deploy:
@@ -31,6 +31,9 @@ jobs:
       - uses: azure/setup-kubectl@v3
       - name: test
         run: |
+          mkdir -p ~/.kube
+          touch ~/.kube/config
+          echo "${KUBE_CONFIG}" > ~/.kube/config
           TAG_NAME=$( git describe --tags --dirty --always --abbrev=12 )
           echo "TAG_NAME:"$TAG_NAME 
           kubectl get pod -A 
