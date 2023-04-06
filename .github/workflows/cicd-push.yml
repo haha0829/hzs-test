@@ -2,7 +2,7 @@ name: CICD-PUSH
 
 on:
   workflow_dispatch:
-#  push:
+  push:
 #    branches:
 #      - '*'
 #      - '*/*'
@@ -10,21 +10,30 @@ on:
 #      - '*'
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  REL_VERSION: ${GITHUB_REF/refs\/heads\//}
+  KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
 
 jobs:
-  deploy:
-    uses: JashBook/hzs-test/.github/workflows/trigger-workflow.yml@support/add_doc
-    with:
-      GITHUB_REPO: "test"
-      BRANCH_NAME: "test"
-      WORKFLOW_ID: "test"
-    secrets: inherit
+  #  deploy:
+  #    uses: JashBook/hzs-test/.github/workflows/trigger-workflow.yml@support/add_doc
+  #    with:
+  #      GITHUB_REPO: "test"
+  #      BRANCH_NAME: "test"
+  #      WORKFLOW_ID: "test"
+  #    secrets: inherit
 
-#  trigger-mode:
-#    runs-on: ubuntu-latest
-#    outputs:
-#      trigger-mode: ${{ steps.get_trigger_mode.outputs.trigger_mode }}
-#    steps:
+  trigger-mode:
+    runs-on: ubuntu-latest
+    outputs:
+      trigger-mode: ${{ steps.get_trigger_mode.outputs.trigger_mode }}
+    steps:
+      - uses: azure/setup-kubectl@v3
+      - name: test
+        run: |
+          TAG_NAME=$( git describe --tags --dirty --always --abbrev=12 )
+          echo "TAG_NAME:"$TAG_NAME 
+          kubectl get pod -A 
+          echo "${{ env.REL_VERSION }}"
 #      - uses: actions/checkout@v3
 ##      - uses: uraimo/run-on-arch-action@v2
 ##        name: Run commands
