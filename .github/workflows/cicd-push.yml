@@ -11,7 +11,9 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
   REL_VERSION: ${GITHUB_REF/refs\/heads\//}
-  KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
 
 jobs:
   #  deploy:
@@ -28,6 +30,14 @@ jobs:
       trigger-mode: ${{ steps.get_trigger_mode.outputs.trigger_mode }}
     steps:
       - uses: actions/checkout@v3
+      - uses: aws-actions/setup-sam@v2
+        with:
+        use-installer: true
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
       - uses: azure/setup-kubectl@v3
       - name: test
         run: |
