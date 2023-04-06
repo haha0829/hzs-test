@@ -2,11 +2,12 @@ name: CICD-PUSH
 
 on:
   workflow_dispatch:
-    KUBECTL_VERSION:
-      description: "Install the specify version of kubectl"
-      type: string
-      required: false
-      default: ''
+    inputs:
+      KUBECTL_VERSION:
+        description: "Install the specify version of kubectl"
+        type: string
+        required: false
+        default: ''
   push:
 #    branches:
 #      - '*'
