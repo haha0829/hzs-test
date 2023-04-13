@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Install Docker Desktop
         run: |
-          curl -fsSL https://download.docker.com/mac/stable/Docker.dmg -o Docker.dmg
+          curl -fsSL https://desktop.docker.com/mac/main/amd64/Docker.dmg -o Docker.dmg
           open Docker.dmg
           sudo cp -r /Applications/Docker.app /Applications/
 
