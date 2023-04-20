@@ -16,6 +16,8 @@ Usage: $(basename "$0") <options>
                                 4) update release latest
                                 5) update release latest
                                 6) get the ci trigger mode
+                                7) check image exists
+                                8) check package version
     -tn, --tag-name           Release tag name
     -gr, --github-repo        Github Repo
     -gt, --github-token       Github token
@@ -56,6 +58,9 @@ main() {
         ;;
         7)
             check_image_exists
+        ;;
+        8)
+            check_package_version
         ;;
         *)
             show_help
@@ -193,6 +198,27 @@ check_image_exists() {
         echo "$(tput setaf 1)$image is not exists.$(tput sgr 0)"
 #        EXIT_STATUS=1
     done
+}
+
+check_package_version() {
+    exit_status=0
+    beta_tag="v"*"."*"."*"-beta."*
+    rc_tag="v"*"."*"."*"-rc."*
+    official_tag="v"*"."*"."*
+    not_official_tag="v"*"."*"."*"-"*
+    if [[ "$TAG_NAME" == $official_tag && "$TAG_NAME" != $not_official_tag ]]; then
+        echo "Release version does not allow packaging (e.g. v0.1.0)"
+        exit_status=1
+    elif [[ "$TAG_NAME" == $beta_tag ]]; then
+        echo "Beta version does not allow packaging (e.g. v0.1.0-beta.1)"
+        exit_status=1
+    elif [[ "$TAG_NAME" == $rc_tag ]]; then
+        echo "Release Candidate version does not allow packaging (e.g. v0.1.0-rc.1)"
+        exit_status=1
+    else
+        echo "Version allows packaging"
+    fi
+    exit $exit_status
 }
 
 main "$@"
