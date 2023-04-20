@@ -207,16 +207,16 @@ check_package_version() {
     official_tag="v"*"."*"."*
     not_official_tag="v"*"."*"."*"-"*
     if [[ "$TAG_NAME" == $official_tag && "$TAG_NAME" != $not_official_tag ]]; then
-        echo "Release version does not allow packaging (e.g. v0.1.0)"
+        echo "$(tput -T xterm setaf 1)::error title=Not Allow::Release version does not allow packaging (e.g. v0.1.0)$(tput -T xterm sgr0)"
         exit_status=1
     elif [[ "$TAG_NAME" == $beta_tag ]]; then
-        echo "Beta version does not allow packaging (e.g. v0.1.0-beta.1)"
+        echo "$(tput -T xterm setaf 1)::error title=Not Allow::Beta version does not allow packaging (e.g. v0.1.0)$(tput -T xterm sgr0)"
         exit_status=1
     elif [[ "$TAG_NAME" == $rc_tag ]]; then
-        echo "Release Candidate version does not allow packaging (e.g. v0.1.0-rc.1)"
+        echo "$(tput -T xterm setaf 1)::error title=Not Allow::Release Candidate version does not allow packaging (e.g. v0.1.0)$(tput -T xterm sgr0)"
         exit_status=1
     else
-        echo "Version allows packaging"
+        echo "$(tput -T xterm setaf 2)Version allows packaging$(tput -T xterm sgr0)"
     fi
     exit $exit_status
 }
