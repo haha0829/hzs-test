@@ -10,25 +10,22 @@ env:
 jobs:
   pr-check:
     name: PR Pre-Check
+    if: ${{ !startsWith(github.head_ref, 'releasing-') && !startsWith(github.base_ref, 'release-') }}
     runs-on: ubuntu-latest
     steps:
       - name: check branch name
         uses: JashBook/check-branch-name@v0.1.0
         with:
-          branch_pattern: 'feature/|bugfix/|release/|release-|releasing/|releasing-|hotfix/|support/'
-          comment_for_invalid_branch_name: 'This branch name is not following the standards: feature/|bugfix/|release/|release-|releasing/|releasing-|hotfix/|support/'
+          branch_pattern: 'feature/|bugfix/|release/|hotfix/|support/'
+          comment_for_invalid_branch_name: 'This branch name is not following the standards: feature/|bugfix/|release/|hotfix/|support/'
           fail_if_invalid_branch_name: 'true'
           ignore_branch_pattern: 'main|master'
 
       - name: check PR title
-        if: ${{ !startsWith(github.head_ref, 'releasing-') }}
         uses: amannn/action-semantic-pull-request@v5
 
       - uses: actions/checkout@v3
-        if: ${{ !startsWith(github.head_ref, 'releasing-') }}
-
       - name: check issue link
-        if: ${{ !startsWith(github.head_ref, 'releasing-') }}
         run: |
           bash ${{ github.workspace }}/.github/utils/issue-link.sh \
             ${{ github.repository }} \
