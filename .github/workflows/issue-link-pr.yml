@@ -3,6 +3,7 @@ name: PULL-REQUEST-CHECK
 on:
   pull_request_target:
     types: [ edited, opened ]
+    
 
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -15,8 +16,8 @@ jobs:
       - name: check branch name
         uses: JashBook/check-branch-name@v0.1.0
         with:
-          branch_pattern: 'feature/|bugfix/|release/|hotfix/|support/'
-          comment_for_invalid_branch_name: 'This branch name is not following the standards: feature/|bugfix/|release/|hotfix/|support/'
+          branch_pattern: 'feature/|bugfix/|release/|release-|releasing/|releasing-|hotfix/|support/'
+          comment_for_invalid_branch_name: 'This branch name is not following the standards: feature/|bugfix/|release/|release-|releasing/|releasing-|hotfix/|support/'
           fail_if_invalid_branch_name: 'true'
           ignore_branch_pattern: 'main|master'
 
