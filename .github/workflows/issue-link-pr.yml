@@ -10,7 +10,7 @@ env:
 jobs:
   pr-check:
     name: PR Pre-Check
-    if: ${{ !startsWith(github.head_ref, 'releasing-') && !startsWith(github.base_ref, 'release-') }}
+    if: ${{ !(startsWith(github.head_ref, 'releasing-') && startsWith(github.base_ref, 'release-')) }}
     runs-on: ubuntu-latest
     steps:
       - name: check branch name
