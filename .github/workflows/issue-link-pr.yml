@@ -21,14 +21,14 @@ jobs:
           ignore_branch_pattern: 'main|master'
 
       - name: check PR title
-        if: startsWith(github.head_ref, 'releasing')
+        if: startsWith(github.head_ref, 'releasing-')
         uses: amannn/action-semantic-pull-request@v5
 
       - uses: actions/checkout@v3
-        if: startsWith(github.head_ref, 'releasing')
+        if: startsWith(github.head_ref, 'releasing-')
 
       - name: check issue link
-        if: startsWith(github.head_ref, 'releasing')
+        if: startsWith(github.head_ref, 'releasing-')
         run: |
           bash ${{ github.workspace }}/.github/utils/issue-link.sh \
             ${{ github.repository }} \
