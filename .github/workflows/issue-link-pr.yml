@@ -3,6 +3,9 @@ name: PULL-REQUEST-CHECK
 on:
   pull_request_target:
     types: [ edited, opened ]
+    branches-ignore:
+      - 'release-*'
+      - 'main'
 
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
