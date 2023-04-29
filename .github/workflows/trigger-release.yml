@@ -1,0 +1,26 @@
+name: TRIGGER-RELEASE
+
+on:
+  workflow_dispatch:
+    inputs:
+      trigger-content:
+        description: 'the bot request content'
+        required: false
+        default: ''
+
+run-name: request:${{ inputs.trigger-content }}
+
+env:
+  GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+
+jobs:
+  trigger-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: trigger release
+        run: |
+          echo ${{ inputs.trigger-content }}
+
+    
