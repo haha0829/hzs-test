@@ -115,6 +115,30 @@ parse_command_line() {
                     shift
                 fi
                 ;;
+            -bn|--branch-name)
+                if [[ -n "${2:-}" ]]; then
+                    BRANCH_NAME="$2"
+                    shift
+                fi
+                ;;
+            -c|--content)
+                if [[ -n "${2:-}" ]]; then
+                    CONTENT="$2"
+                    shift
+                fi
+                ;;
+            -bw|--bot-webhook)
+                if [[ -n "${2:-}" ]]; then
+                    BOT_WEBHOOK="$2"
+                    shift
+                fi
+                ;;
+            -tt|--trigger-type )
+                if [[ -n "${2:-}" ]]; then
+                    TRIGGER_TYPE="$2"
+                    shift
+                fi
+                ;;
             *)
                 break
                 ;;
@@ -177,30 +201,6 @@ get_trigger_mode() {
             .github/*|.devcontainer/*|githooks/*|examples/*)
                 add_trigger_mode "other"
             ;;
-            -bn|--branch-name)
-                if [[ -n "${2:-}" ]]; then
-                    BRANCH_NAME="$2"
-                    shift
-                fi
-                ;;
-            -c|--content)
-                if [[ -n "${2:-}" ]]; then
-                    CONTENT="$2"
-                    shift
-                fi
-                ;;
-            -bw|--bot-webhook)
-                if [[ -n "${2:-}" ]]; then
-                    BOT_WEBHOOK="$2"
-                    shift
-                fi
-                ;;
-            -tt|--trigger-type )
-                if [[ -n "${2:-}" ]]; then
-                    TRIGGER_TYPE="$2"
-                    shift
-                fi
-                ;;
             *)
                 add_trigger_mode "test"
                 break
@@ -281,6 +281,7 @@ trigger_release() {
     fi
     case "$CONTENT" in
         '{"ref":"'*'","inputs":{"release_version":"'*'"}}')
+            RELEASE_VERSION=$( echo "$CONTENT" | jq ".inputs.release_version" --raw-output )
             gh_curl -X POST $dispatches_url -d ''$CONTENT''
         ;;
         "do"*"release")
