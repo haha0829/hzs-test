@@ -275,10 +275,7 @@ release_next_available_tag() {
 trigger_release() {
     ret_bot_flag=""
     echo "CONTENT:$CONTENT"
-    dispatches_url=$GITHUB_API/repos/$LATEST_REPO/actions/workflows/release-version.yml/dispatches
-    if [[ "$TRIGGER_TYPE" == "package" ]]; then
-        dispatches_url=$GITHUB_API/repos/$LATEST_REPO/actions/workflows/package-version.yml/dispatches
-    fi
+    dispatches_url=$GITHUB_API/repos/$LATEST_REPO/actions/workflows/$TRIGGER_TYPE-version.yml/dispatches
     case "$CONTENT" in
         '{"ref":"'*'","inputs":{"release_version":"'*'"}}')
             RELEASE_VERSION=$( echo "$CONTENT" | jq ".inputs.release_version" --raw-output )
