@@ -225,19 +225,18 @@ get_next_available_tag() {
     tag_type="$1"
     index=""
     release_list=$( gh release list --repo $LATEST_REPO )
-    for release in $( echo "$release_list" | (grep "$tag_type" || true) ) ;do
-        for tag in $( echo "$release" ); do
-            if [[ "$tag" == "$tag_type"* ]]; then
-                tmp=${tag#*$tag_type}
-                numeric=$( check_numeric "$tmp" )
-                if [[ "$numeric" == "no" ]]; then
-                    continue
-                fi
-                if [[ $numeric -gt $index ]]; then
-                    index=$numeric
-                fi
-            fi
-        done
+    for tag in $( echo "$release_list" | (grep "$tag_type" || true) ) ;do
+        if [[ "$tag" != "$tag_type"* ]]; then
+            continue
+        fi
+        tmp=${tag#*$tag_type}
+        numeric=$( check_numeric "$tmp" )
+        if [[ "$numeric" == "no" ]]; then
+            continue
+        fi
+        if [[ $numeric -gt $index ]]; then
+            index=$numeric
+        fi
     done
 
     if [[ -z "$index" ]];then
