@@ -18,9 +18,14 @@ Usage: $(basename "$0") <options>
                                 6) get the ci trigger mode
                                 7) check image exists
                                 8) check package version
+                                9) trigger release
     -tn, --tag-name           Release tag name
     -gr, --github-repo        Github Repo
     -gt, --github-token       Github token
+    -bn, --branch-name        The branch name
+    -c, --content             The trigger request content
+    -bw, --bot-webhook        The bot webhook
+    -tt, --trigger-type       The trigger type (e.g. release/package)
 EOF
 }
 
@@ -34,6 +39,11 @@ main() {
     local GITHUB_TOKEN
     local TRIGGER_MODE=""
     local EXIT_STATUS=0
+    local BRANCH_NAME=""
+    local CONTENT=""
+    local BOT_WEBHOOK=""
+    local TRIGGER_TYPE=""
+    local RELEASE_VERSION=""
 
     parse_command_line "$@"
 
@@ -61,6 +71,9 @@ main() {
         ;;
         8)
             check_package_version
+        ;;
+        9)
+            trigger_release
         ;;
         *)
             show_help
@@ -164,6 +177,30 @@ get_trigger_mode() {
             .github/*|.devcontainer/*|githooks/*|examples/*)
                 add_trigger_mode "other"
             ;;
+            -bn|--branch-name)
+                if [[ -n "${2:-}" ]]; then
+                    BRANCH_NAME="$2"
+                    shift
+                fi
+                ;;
+            -c|--content)
+                if [[ -n "${2:-}" ]]; then
+                    CONTENT="$2"
+                    shift
+                fi
+                ;;
+            -bw|--bot-webhook)
+                if [[ -n "${2:-}" ]]; then
+                    BOT_WEBHOOK="$2"
+                    shift
+                fi
+                ;;
+            -tt|--trigger-type )
+                if [[ -n "${2:-}" ]]; then
+                    TRIGGER_TYPE="$2"
+                    shift
+                fi
+                ;;
             *)
                 add_trigger_mode "test"
                 break
@@ -173,6 +210,93 @@ get_trigger_mode() {
     echo $TRIGGER_MODE
 }
 
+
+
+check_numeric() {
+    input=${1:-""}
+    if [[ $input =~ ^[0-9]+$ ]]; then
+        echo $(( ${input} ))
+    else
+        echo "no"
+    fi
+}
+
+get_next_available_tag() {
+    tag_type="$1"
+    index=""
+    release_list=$( gh release list --repo $LATEST_REPO )
+    for tag in $( echo "$release_list" | (grep "$tag_type" || true) | awk '{print $2}' ) ;do
+        tmp=${tag#*$tag_type}
+        numeric=$( check_numeric "$tmp" )
+        if [[ "$numeric" == "no" ]]; then
+            continue
+        fi
+        if [[ $numeric -gt $index ]]; then
+            index=$numeric
+        fi
+    done
+
+    if [[ -z "$index" ]];then
+        index=0
+    else
+        index=$(( $index + 1 ))
+    fi
+
+    RELEASE_VERSION="${tag_type}${index}"
+}
+
+release_next_available_tag() {
+    dispatches_url=$1
+    v_head="v$TAG_NAME"
+    alpha_type="$v_head.0-alpha."
+    beta_type="$v_head.0-beta."
+    rc_type="$v_head.0-rc."
+    stable_type="$v_head."
+    case "$CONTENT" in
+        *alpha*)
+            get_next_available_tag "$alpha_type"
+        ;;
+        *beta*)
+            get_next_available_tag "$beta_type"
+        ;;
+        *rc*)
+            get_next_available_tag "$rc_type"
+        ;;
+        *stable*)
+            get_next_available_tag $stable_type
+        ;;
+    esac
+
+    if [[ ! -z "$RELEASE_VERSION" ]];then
+        gh_curl -X POST $dispatches_url -d '{"ref":"'$BRANCH_NAME'","inputs":{"release_version":"'$RELEASE_VERSION'"}}'
+    fi
+}
+
+trigger_release() {
+    ret_bot_flag=""
+    echo "CONTENT:$CONTENT"
+    dispatches_url=$GITHUB_API/repos/$LATEST_REPO/actions/workflows/release-version.yml/dispatches
+    if [[ "$TRIGGER_TYPE" == "package" ]]; then
+        dispatches_url=$GITHUB_API/repos/$LATEST_REPO/actions/workflows/package-version.yml/dispatches
+    fi
+    case "$CONTENT" in
+        '{"ref":"'*'","inputs":{"release_version":"'*'"}}')
+            gh_curl -X POST $dispatches_url -d ''$CONTENT''
+        ;;
+        "do"*"release")
+            release_next_available_tag "$dispatches_url"
+        ;;
+    esac
+
+    if [[ ! -z "$RELEASE_VERSION" ]]; then
+        echo "RELEASE_VERSION:$RELEASE_VERSION"
+        curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
+            -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Release:","content":[[{"tag":"text","text":"yes master, release "},{"tag":"a","text":"['$RELEASE_VERSION']","href":"https://github.com/apecloud/kubeblocks/releases/tag/'$RELEASE_VERSION'"},{"tag":"text","text":" is on its way..."}]]}}}}'
+    else
+        curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
+            -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Usage:","content":[[{"tag":"text","text":"sorry master, please enter the correct format\n"},{"tag":"text","text":"1. do <alpha|beta|rc|stable> release\n"},{"tag":"text","text":"2. {\"ref\":\"<ref_branch>\",\"inputs\":{\"release_version\":\"<release_version>\"}}"}]]}}}}'
+    fi
+}
 
 check_image_exists() {
      image=registry.cn-hangzhou.aliyuncs.com/apecloud/configmap-reload:v0.5.0

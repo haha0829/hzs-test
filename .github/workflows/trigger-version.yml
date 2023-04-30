@@ -3,12 +3,12 @@ name: TRIGGER-RELEASE
 on:
   workflow_dispatch:
     inputs:
-      trigger_content:
-        description: 'the bot request content'
-        required: false
+      release_version:
+        description: 'The tag name of release'
+        required: true
         default: ''
 
-run-name: request:${{ inputs.trigger_content }}
+run-name: request:${{ inputs.release_version }}
 
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -21,6 +21,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: trigger release
         run: |
-          echo ${{ inputs.trigger_content }}
+          echo ${{ inputs.release_version }}
 
     
