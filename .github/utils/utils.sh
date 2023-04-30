@@ -291,7 +291,7 @@ trigger_release() {
     if [[ ! -z "$RELEASE_VERSION" ]]; then
         echo "RELEASE_VERSION:$RELEASE_VERSION"
         curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
-            -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Release:","content":[[{"tag":"text","text":"yes master, release "},{"tag":"a","text":"['$RELEASE_VERSION']","href":"https://github.com/apecloud/kubeblocks/releases/tag/'$RELEASE_VERSION'"},{"tag":"text","text":" is on its way..."}]]}}}}'
+            -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Release:","content":[[{"tag":"text","text":"yes master, release "},{"tag":"a","text":"['$RELEASE_VERSION']","href":"https://github.com/'$LATEST_REPO'/releases/tag/'$RELEASE_VERSION'"},{"tag":"text","text":" is on its way..."}]]}}}}'
     else
         curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
             -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Usage:","content":[[{"tag":"text","text":"sorry master, please enter the correct format\n"},{"tag":"text","text":"1. do <alpha|beta|rc|stable> release\n"},{"tag":"text","text":"2. {\"ref\":\"<ref_branch>\",\"inputs\":{\"release_version\":\"<release_version>\"}}"}]]}}}}'
