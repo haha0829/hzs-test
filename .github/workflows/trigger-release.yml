@@ -32,7 +32,7 @@ jobs:
           if [[ "${{ inputs.trigger-type }}" == "package" ]]; then
               BOT_WEBHOOK=${{ env.PACKAGE_BOT_WEBHOOK }}
           fi
-          RELEASE_VERSION=`bash .github/utils/utils.sh --type 10 \
+          RELEASE_VERSION=`bash .github/utils/utils.sh --type 9 \
             --tag-name "${{ vars.CURRENT_RELEASE_VERSION }}" \
             --branch-name "${{ vars.CURRENT_RELEASE_BRANCH }}" \
             --content '${{ inputs.trigger-content }}' \
