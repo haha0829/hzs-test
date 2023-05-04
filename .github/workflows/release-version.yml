@@ -41,5 +41,5 @@ jobs:
         run: |
           bash .github/utils/utils.sh --type 12 \
             --content 'release error' \
-            --run-url '$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/runs/$GITHUB_RUN_ID' \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --bot-webhook ${{ env.RELEASE_BOT_WEBHOOK }}
