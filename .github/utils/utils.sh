@@ -279,7 +279,6 @@ release_next_available_tag() {
     fi
 }
 
-
 usage_message() {
     curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
         -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Usage:","content":[[{"tag":"text","text":"sorry master, please enter the correct format\n"},{"tag":"text","text":"1. do <alpha|beta|rc|stable> release\n"},{"tag":"text","text":"2. {\"ref\":\"<ref_branch>\",\"inputs\":{\"release_version\":\"<release_version>\"}}"}]]}}}}'

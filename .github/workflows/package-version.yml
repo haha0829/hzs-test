@@ -36,5 +36,5 @@ jobs:
       - name: package message
         run: |
           bash .github/utils/utils.sh --type 11 \
-            --tag-name "${{ inputs.release_version }}"
+            --tag-name "${{ inputs.release_version }}" \
             --bot-webhook ${{ env.PACKAGE_BOT_WEBHOOK }}
