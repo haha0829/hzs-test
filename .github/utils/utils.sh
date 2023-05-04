@@ -27,6 +27,7 @@ Usage: $(basename "$0") <options>
     -c, --content             The trigger request content
     -bw, --bot-webhook        The bot webhook
     -tt, --trigger-type       The trigger type (e.g. release/package)
+    -ru, --run-url            The run url
 EOF
 }
 
@@ -45,6 +46,7 @@ main() {
     local BOT_WEBHOOK=""
     local TRIGGER_TYPE=""
     local RELEASE_VERSION=""
+    local RUN_URL=""
 
     parse_command_line "$@"
 
@@ -78,6 +80,9 @@ main() {
         ;;
         11)
             release_message
+        ;;
+        12)
+            feedback_message
         ;;
         *)
             show_help
@@ -140,6 +145,12 @@ parse_command_line() {
             -tt|--trigger-type )
                 if [[ -n "${2:-}" ]]; then
                     TRIGGER_TYPE="$2"
+                    shift
+                fi
+                ;;
+            -ru|--run-url)
+                if [[ -n "${2:-}" ]]; then
+                    RUN_URL="$2"
                     shift
                 fi
                 ;;
@@ -298,6 +309,11 @@ trigger_release() {
 release_message() {
     curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
         -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Release:","content":[[{"tag":"text","text":"yes master, release "},{"tag":"a","text":"['$TAG_NAME']","href":"https://github.com/'$LATEST_REPO'/releases/tag/'$TAG_NAME'"},{"tag":"text","text":" is on its way..."}]]}}}}'
+}
+
+feedback_message() {
+    curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
+        -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Error:","content":[[{"tag":"text","text":"sorry master, "},{"tag":"a","text":"['$CONTENT']","href":"'$RUN_URL'"}]]}}}}'
 }
 
 check_image_exists() {
