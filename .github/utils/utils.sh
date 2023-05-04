@@ -78,6 +78,7 @@ main() {
         ;;
         11)
             release_message
+        ;;
         *)
             show_help
             break
