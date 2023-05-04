@@ -279,11 +279,6 @@ release_next_available_tag() {
     fi
 }
 
-release_message() {
-    echo "RELEASE_VERSION:$RELEASE_VERSION"
-    curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
-        -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Release:","content":[[{"tag":"text","text":"yes master, release "},{"tag":"a","text":"['$RELEASE_VERSION']","href":"https://github.com/'$LATEST_REPO'/releases/tag/'$RELEASE_VERSION'"},{"tag":"text","text":" is on its way..."}]]}}}}'
-}
 
 usage_message() {
     curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
@@ -299,6 +294,11 @@ trigger_release() {
     else
         usage_message
     fi
+}
+
+release_message() {
+    curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
+        -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Release:","content":[[{"tag":"text","text":"yes master, release "},{"tag":"a","text":"['$TAG_NAME']","href":"https://github.com/'$LATEST_REPO'/releases/tag/'$TAG_NAME'"},{"tag":"text","text":" is on its way..."}]]}}}}'
 }
 
 check_image_exists() {
