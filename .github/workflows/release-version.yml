@@ -10,6 +10,8 @@ on:
 
 run-name: ref_name:${{ github.ref_name }} release_version:${{ inputs.release_version }}
 
+env:
+  RELEASE_BOT_WEBHOOK: ${{ secrets.RELEASE_BOT_WEBHOOK }}
 
 jobs:
   release-version:
@@ -22,3 +24,15 @@ jobs:
         run: |
           git tag ${{ inputs.release_version }}
           git push origin ${{ inputs.release_version }}
+
+  release-message:
+    needs: release-version
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: release message
+        run: |
+          bash .github/utils/utils.sh --type 11 \
+            --tag-name "${{ inputs.release_version }}"
+            --bot-webhook ${{ env.RELEASE_BOT_WEBHOOK }}

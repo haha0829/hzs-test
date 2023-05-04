@@ -19,6 +19,7 @@ Usage: $(basename "$0") <options>
                                 7) check image exists
                                 8) check package version
                                 9) trigger release
+                                11) release message
     -tn, --tag-name           Release tag name
     -gr, --github-repo        Github Repo
     -gt, --github-token       Github token
@@ -75,6 +76,8 @@ main() {
         9)
             trigger_release
         ;;
+        11)
+            release_message
         *)
             show_help
             break
@@ -275,27 +278,25 @@ release_next_available_tag() {
     fi
 }
 
+release_message() {
+    echo "RELEASE_VERSION:$RELEASE_VERSION"
+    curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
+        -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Release:","content":[[{"tag":"text","text":"yes master, release "},{"tag":"a","text":"['$RELEASE_VERSION']","href":"https://github.com/'$LATEST_REPO'/releases/tag/'$RELEASE_VERSION'"},{"tag":"text","text":" is on its way..."}]]}}}}'
+}
+
+usage_message() {
+    curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
+        -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Usage:","content":[[{"tag":"text","text":"sorry master, please enter the correct format\n"},{"tag":"text","text":"1. do <alpha|beta|rc|stable> release\n"},{"tag":"text","text":"2. {\"ref\":\"<ref_branch>\",\"inputs\":{\"release_version\":\"<release_version>\"}}"}]]}}}}'
+}
+
 trigger_release() {
-    ret_bot_flag=""
     echo "CONTENT:$CONTENT"
     dispatches_url=$GITHUB_API/repos/$LATEST_REPO/actions/workflows/$TRIGGER_TYPE-version.yml/dispatches
-    case "$CONTENT" in
-        '{"ref":"'*'","inputs":{"release_version":"'*'"}}')
-            RELEASE_VERSION=$( echo "$CONTENT" | jq ".inputs.release_version" --raw-output )
-            gh_curl -X POST $dispatches_url -d ''$CONTENT''
-        ;;
-        "do"*"release")
-            release_next_available_tag "$dispatches_url"
-        ;;
-    esac
 
-    if [[ ! -z "$RELEASE_VERSION" ]]; then
-        echo "RELEASE_VERSION:$RELEASE_VERSION"
-        curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
-            -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Release:","content":[[{"tag":"text","text":"yes master, release "},{"tag":"a","text":"['$RELEASE_VERSION']","href":"https://github.com/'$LATEST_REPO'/releases/tag/'$RELEASE_VERSION'"},{"tag":"text","text":" is on its way..."}]]}}}}'
+    if [[ "$CONTENT" == "do"*"release" ]]; then
+        release_next_available_tag "$dispatches_url"
     else
-        curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
-            -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Usage:","content":[[{"tag":"text","text":"sorry master, please enter the correct format\n"},{"tag":"text","text":"1. do <alpha|beta|rc|stable> release\n"},{"tag":"text","text":"2. {\"ref\":\"<ref_branch>\",\"inputs\":{\"release_version\":\"<release_version>\"}}"}]]}}}}'
+        usage_message
     fi
 }
 
