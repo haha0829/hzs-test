@@ -40,6 +40,6 @@ jobs:
       - name: release message
         run: |
           bash .github/utils/utils.sh --type 12 \
-            --content 'release error' \
+            --content "release\u00a0error" \
             --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --bot-webhook ${{ env.RELEASE_BOT_WEBHOOK }}

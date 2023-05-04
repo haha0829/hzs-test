@@ -42,6 +42,6 @@ jobs:
       - name: release message
         run: |
           bash .github/utils/utils.sh --type 12 \
-            --content 'package error' \
+            --content "package\u00a0error" \
             --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --bot-webhook ${{ env.PACKAGE_BOT_WEBHOOK }}
