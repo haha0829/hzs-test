@@ -16,19 +16,7 @@ env:
 
 
 jobs:
-  package-version:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout branch ${{ github.ref_name }}
-        uses: actions/checkout@v3
-
-      - name: push tag
-        run: |
-          git tag ${{ inputs.release_version }}
-          git push origin ${{ inputs.release_version }}
-
   package-message:
-    needs: package-version
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
@@ -38,3 +26,15 @@ jobs:
           bash .github/utils/utils.sh --type 11 \
             --tag-name "${{ inputs.release_version }}" \
             --bot-webhook ${{ env.PACKAGE_BOT_WEBHOOK }}
+
+  package-version:
+    needs: package-message
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout branch ${{ github.ref_name }}
+        uses: actions/checkout@v3
+
+      - name: push tag
+        run: |
+          git tag ${{ inputs.release_version }}
+          git push origin ${{ inputs.release_version }}
