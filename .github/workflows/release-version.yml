@@ -14,9 +14,7 @@ env:
   RELEASE_BOT_WEBHOOK: ${{ secrets.RELEASE_BOT_WEBHOOK }}
 
 jobs:
-
   release-version:
-    needs: release-message
     runs-on: ubuntu-latest
     steps:
       - name: checkout branch ${{ github.ref_name }}
