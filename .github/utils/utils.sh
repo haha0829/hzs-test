@@ -20,6 +20,7 @@ Usage: $(basename "$0") <options>
                                 8) check package version
                                 9) trigger release
                                 11) release message
+                                12) send message
     -tn, --tag-name           Release tag name
     -gr, --github-repo        Github Repo
     -gt, --github-token       Github token
@@ -82,7 +83,7 @@ main() {
             release_message
         ;;
         12)
-            feedback_message
+            send_message
         ;;
         *)
             show_help
@@ -311,7 +312,7 @@ release_message() {
         -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Release:","content":[[{"tag":"text","text":"yes master, release "},{"tag":"a","text":"['$TAG_NAME']","href":"https://github.com/'$LATEST_REPO'/releases/tag/'$TAG_NAME'"},{"tag":"text","text":" is on its way..."}]]}}}}'
 }
 
-feedback_message() {
+send_message() {
     curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
         -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Error:","content":[[{"tag":"text","text":"sorry master, "},{"tag":"a","text":"['$CONTENT']","href":"'$RUN_URL'"}]]}}}}'
 }
