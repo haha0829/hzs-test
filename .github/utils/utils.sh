@@ -313,8 +313,13 @@ release_message() {
 }
 
 send_message() {
-    curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
-        -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Error:","content":[[{"tag":"text","text":"sorry master, "},{"tag":"a","text":"['$CONTENT']","href":"'$RUN_URL'"}]]}}}}'
+    if [[ "$CONTENT" == *"success" ]]; then
+        curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
+            -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Success:","content":[[{"tag":"text","text":"'$CONTENT'"}]]}}}}'
+    else
+        curl -H "Content-Type: application/json" -X POST $BOT_WEBHOOK \
+            -d '{"msg_type":"post","content":{"post":{"zh_cn":{"title":"Error:","content":[[{"tag":"text","text":"sorry master, "},{"tag":"a","text":"['$CONTENT']","href":"'$RUN_URL'"}]]}}}}'
+    fi
 }
 
 check_image_exists() {
