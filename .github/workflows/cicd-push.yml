@@ -27,13 +27,18 @@ jobs:
   merge-relase:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: merge releasing to release
-        if: ${{ startsWith(github.ref_name, 'releasing-') }}
+      - name: Check filesystem type
         run: |
-          git checkout -b release-0.3
-          git merge ${{ github.ref_name }}
-          git push --set-upstream origin release-0.3
+          df -T
+          cat /etc/fstab
+          lsblk -f
+#      - uses: actions/checkout@v3
+#      - name: merge releasing to release
+#        if: ${{ startsWith(github.ref_name, 'releasing-') }}
+#        run: |
+#          git checkout -b release-0.3
+#          git merge ${{ github.ref_name }}
+#          git push --set-upstream origin release-0.3
 
 #  test-macos-docker:
 #    runs-on: macos-latest
