@@ -33,6 +33,7 @@ jobs:
     steps:
       - name: Check filesystem type
         run: |
+          echo "$(date "+%Y-%m-%d %T")"
 #          df -T
 #          cat /etc/fstab
 #          lsblk -f
@@ -40,7 +41,6 @@ jobs:
 #          if [[ -z "${{ inputs.KUBECTL_VERSION }}" ]]; then
 #            exit 1
 #          fi
-          echo "$(date "+%Y-%m-%d %T")"
           
 #  send-message:
 #    runs-on: ubuntu-latest
