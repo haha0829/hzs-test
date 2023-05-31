@@ -33,63 +33,64 @@ jobs:
     steps:
       - name: Check filesystem type
         run: |
-          df -T
-          cat /etc/fstab
-          lsblk -f
-          sleep 60
-          if [[ -z "${{ inputs.KUBECTL_VERSION }}" ]]; then
-            exit 1
-          fi
+#          df -T
+#          cat /etc/fstab
+#          lsblk -f
+#          sleep 60
+#          if [[ -z "${{ inputs.KUBECTL_VERSION }}" ]]; then
+#            exit 1
+#          fi
+          echo "$(date "+%Y-%m-%d %T")"
           
-  send-message:
-    runs-on: ubuntu-latest
-    needs: merge-relase
-    if: ${{ failure() || cancelled() }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: send message
-        run: |
-          bash .github/utils/utils.sh --type 12 \
-            --content "send-message\u00a0error" \
-            --bot-webhook ${{ env.RELEASE_BOT_WEBHOOK }} \
-            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-
-  send-message2:
-    runs-on: ubuntu-latest
-    needs: merge-relase
-    if: ${{ always() && github.event.action == 'published' }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: send message
-        run: |
-          CONTENT="send-message2\u00a0chart\u00a0error"
-          if [[ "${{ needs.merge-relase.result }}" == "success" ]]; then
-              CONTENT="send-message2\u00a0chart\u00a0success"
-          fi
-          
-          bash .github/utils/utils.sh --type 12 \
-            --content "${CONTENT}" \
-            --bot-webhook ${{ env.RELEASE_BOT_WEBHOOK }} \
-            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-
-  send-message3:
-    runs-on: ubuntu-latest
-    needs: merge-relase
-    if: ${{ always() }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: send message
-        run: |
-          CONTENT="send-message3\u00a0chart\u00a0error"
-          if [[ "${{ needs.merge-relase.result }}" == "success" ]]; then
-              CONTENT="send-message3\u00a0chart\u00a0success"
-          fi
-          
-          bash .github/utils/utils.sh --type 12 \
-            --content "${CONTENT}" \
-            --bot-webhook ${{ env.RELEASE_BOT_WEBHOOK }} \
-            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          
+#  send-message:
+#    runs-on: ubuntu-latest
+#    needs: merge-relase
+#    if: ${{ failure() || cancelled() }}
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: send message
+#        run: |
+#          bash .github/utils/utils.sh --type 12 \
+#            --content "send-message\u00a0error" \
+#            --bot-webhook ${{ env.RELEASE_BOT_WEBHOOK }} \
+#            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+#
+#  send-message2:
+#    runs-on: ubuntu-latest
+#    needs: merge-relase
+#    if: ${{ always() && github.event.action == 'published' }}
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: send message
+#        run: |
+#          CONTENT="send-message2\u00a0chart\u00a0error"
+#          if [[ "${{ needs.merge-relase.result }}" == "success" ]]; then
+#              CONTENT="send-message2\u00a0chart\u00a0success"
+#          fi
+#
+#          bash .github/utils/utils.sh --type 12 \
+#            --content "${CONTENT}" \
+#            --bot-webhook ${{ env.RELEASE_BOT_WEBHOOK }} \
+#            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+#
+#  send-message3:
+#    runs-on: ubuntu-latest
+#    needs: merge-relase
+#    if: ${{ always() }}
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: send message
+#        run: |
+#          CONTENT="send-message3\u00a0chart\u00a0error"
+#          if [[ "${{ needs.merge-relase.result }}" == "success" ]]; then
+#              CONTENT="send-message3\u00a0chart\u00a0success"
+#          fi
+#
+#          bash .github/utils/utils.sh --type 12 \
+#            --content "${CONTENT}" \
+#            --bot-webhook ${{ env.RELEASE_BOT_WEBHOOK }} \
+#            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+#
 
 #      - uses: actions/checkout@v3
 #      - name: merge releasing to release
