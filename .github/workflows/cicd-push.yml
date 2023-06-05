@@ -36,11 +36,11 @@ jobs:
       - uses: actions/checkout@v3
       - name: delete dockerhub image
         run: |
-          bash ${{ github.workspace }}/.github/utils/utils.sh \
+          script -e -c "bash ${{ github.workspace }}/.github/utils/utils.sh \
               --type 13 \
               --tag-name latest-bak \
               --user ${{ env.DOCKER_USER }} \
-              --password "${{ env.DOCKER_PASSWORD }}"
+              --password \"${{ env.DOCKER_PASSWORD }}\""
 #
 #  delete-aliyun-image:
 #    runs-on: macos-latest
