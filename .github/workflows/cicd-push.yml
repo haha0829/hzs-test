@@ -33,7 +33,8 @@ jobs:
     steps:
       - name: Check filesystem type
         run: |
-          echo "$(date "+%Y-%m-%d %T")"
+          docker version
+          echo "$(date "+%Y-%m-%d-%T")"
 #          df -T
 #          cat /etc/fstab
 #          lsblk -f
