@@ -41,7 +41,6 @@ jobs:
               --tag-name latest-bak \
               --user ${{ env.DOCKER_USER }} \
               --password "${{ env.DOCKER_PASSWORD }}"
-        shell: bash
 #
 #  delete-aliyun-image:
 #    runs-on: macos-latest
