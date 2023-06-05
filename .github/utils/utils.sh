@@ -91,10 +91,10 @@ main() {
         12)
             send_message
         ;;
-        10)
+        13)
             delete_docker_images
         ;;
-        11)
+        14)
             delete_aliyun_images
         ;;
         *)
