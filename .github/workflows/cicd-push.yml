@@ -71,7 +71,7 @@ jobs:
       - name: Check filesystem type
         run: |
           for release in $(echo "${{ inputs.VERSION }}" | sed 's/|/ /g'); do
-              echo "$(date "+%Y-%m-%d-%T"):$release"
+              script -e -c " echo \"$(date "+%Y-%m-%d-%T"):$release\" "
           done
 
 #          docker version
