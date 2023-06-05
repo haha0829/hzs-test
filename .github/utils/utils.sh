@@ -400,7 +400,7 @@ delete_docker_images() {
         apecloud/kubeblocks:$TAG_NAME_TMP
 
     echo "delete kubeblocks-tools image $TAG_NAME_TMP"
-    docker run -it --rm apecloud/remove-dockerhub-tag \
+    docker run -t --rm apecloud/remove-dockerhub-tag \
         --user "$USER" --password "$PASSWORD" \
         apecloud/kubeblocks-tools:$TAG_NAME_TMP
 }
