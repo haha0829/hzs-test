@@ -8,6 +8,11 @@ on:
         type: string
         required: false
         default: 'latest'
+      VERSION:
+        description: "The release version"
+        type: string
+        required: false
+        default: 'latest'
   push:
   release:
     types:
@@ -30,17 +35,17 @@ env:
 
 
 jobs:
-  delete-image:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: delete dockerhub image
-        run: |
-          script -e -c "bash ${{ github.workspace }}/.github/utils/utils.sh \
-              --type 13 \
-              --tag-name latest-bak \
-              --user ${{ env.DOCKER_USER }} \
-              --password \"${{ env.DOCKER_PASSWORD }}\""
+#  delete-image:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: delete dockerhub image
+#        run: |
+#          script -e -c "bash ${{ github.workspace }}/.github/utils/utils.sh \
+#              --type 13 \
+#              --tag-name latest-bak \
+#              --user ${{ env.DOCKER_USER }} \
+#              --password \"${{ env.DOCKER_PASSWORD }}\""
 #
 #  delete-aliyun-image:
 #    runs-on: macos-latest
@@ -65,8 +70,12 @@ jobs:
     steps:
       - name: Check filesystem type
         run: |
-          docker version
-          echo "$(date "+%Y-%m-%d-%T")"
+          for release in $(echo "${{ inputs.VERSION }}" | sed 's/|/ /g'); do
+              echo "$(date "+%Y-%m-%d-%T"):$release"
+          done
+
+#          docker version
+#          echo "$(date "+%Y-%m-%d-%T")"
 #          df -T
 #          cat /etc/fstab
 #          lsblk -f
