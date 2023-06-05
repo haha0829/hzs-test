@@ -29,7 +29,7 @@ env:
 
 jobs:
   merge-relase:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Check filesystem type
         run: |
