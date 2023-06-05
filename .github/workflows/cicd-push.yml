@@ -34,8 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Disable TTY
-        run: export TTY=0
+      - uses: docker/setup-qemu-action@v2
       - name: delete dockerhub image
         run: |
           bash ${{ github.workspace }}/.github/utils/utils.sh \
