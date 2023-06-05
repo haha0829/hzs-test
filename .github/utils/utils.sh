@@ -21,6 +21,8 @@ Usage: $(basename "$0") <options>
                                 9) trigger release
                                 11) release message
                                 12) send message
+                                13) delete docker images
+                                14) delete aliyun images
     -tn, --tag-name           Release tag name
     -gr, --github-repo        Github Repo
     -gt, --github-token       Github token
@@ -48,8 +50,12 @@ main() {
     local TRIGGER_TYPE=""
     local RELEASE_VERSION=""
     local RUN_URL=""
+    local USER=""
+    local PASSWORD=""
 
     parse_command_line "$@"
+
+    local TAG_NAME_TMP=${TAG_NAME/v/}
 
     case $TYPE in
         1)
@@ -84,6 +90,12 @@ main() {
         ;;
         12)
             send_message
+        ;;
+        10)
+            delete_docker_images
+        ;;
+        11)
+            delete_aliyun_images
         ;;
         *)
             show_help
@@ -152,6 +164,18 @@ parse_command_line() {
             -ru|--run-url)
                 if [[ -n "${2:-}" ]]; then
                     RUN_URL="$2"
+                    shift
+                fi
+                ;;
+            -u|--user)
+                if [[ -n "${2:-}" ]]; then
+                    USER="$2"
+                    shift
+                fi
+                ;;
+            -p|--password)
+                if [[ -n "${2:-}" ]]; then
+                    PASSWORD="$2"
                     shift
                 fi
                 ;;
@@ -367,6 +391,28 @@ check_package_version() {
         echo "$(tput -T xterm setaf 2)Version allows packaging$(tput -T xterm sgr0)"
     fi
     exit $exit_status
+}
+
+delete_docker_images() {
+    echo "delete kubeblocks image $TAG_NAME_TMP"
+    docker run --rm -it apecloud/remove-dockerhub-tag \
+        --user "$USER" --password "$PASSWORD" \
+        apecloud/kubeblocks:$TAG_NAME_TMP
+
+    echo "delete kubeblocks-tools image $TAG_NAME_TMP"
+    docker run --rm -it apecloud/remove-dockerhub-tag \
+        --user "$USER" --password "$PASSWORD" \
+        apecloud/kubeblocks-tools:$TAG_NAME_TMP
+}
+
+delete_aliyun_images() {
+    echo "delete kubeblocks image $TAG_NAME_TMP"
+    skopeo delete docker://registry.cn-hangzhou.aliyuncs.com/apecloud/kubeblocks:$TAG_NAME_TMP \
+        --creds "$USER:$PASSWORD"
+
+    echo "delete kubeblocks-tools image $TAG_NAME_TMP"
+    skopeo delete docker://registry.cn-hangzhou.aliyuncs.com/apecloud/kubeblocks-tools:$TAG_NAME_TMP \
+        --creds "$USER:$PASSWORD"
 }
 
 main "$@"

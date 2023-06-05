@@ -28,8 +28,38 @@ env:
 
 
 jobs:
-  merge-relase:
+  delete-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: delete dockerhub image
+        run: |
+          bash ${{ github.workspace }}/apecd/.github/utils/utils.sh \
+              --type 13 \
+              --tag-name latest-bak \
+              --user ${{ env.DOCKER_USER }} \
+              --password "${{ env.DOCKER_PASSWORD }}"
+
+  delete-aliyun-image:
     runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: install skopeo
+        run: |
+          brew install skopeo
+
+      - name: delete aliyun registry image
+        run: |
+          bash ${{ github.workspace }}/apecd/.github/utils/utils.sh \
+              --type 14 \
+              --tag-name latest-bak \
+              --user ${{ env.ALIYUN_USER }} \
+              --password "${{ env.ALIYUN_PASSWORD }}"
+  
+  
+
+  merge-relase:
+    runs-on: ubuntu-latest
     steps:
       - name: Check filesystem type
         run: |
