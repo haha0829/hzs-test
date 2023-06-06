@@ -62,8 +62,6 @@ jobs:
 #              --tag-name latest-bak \
 #              --user ${{ env.ALIYUN_USER }} \
 #              --password "${{ env.ALIYUN_PASSWORD }}"
-  
-  
 
   merge-relase:
     runs-on: ubuntu-latest
