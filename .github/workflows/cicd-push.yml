@@ -63,7 +63,6 @@ jobs:
 #              --user ${{ env.ALIYUN_USER }} \
 #              --password "${{ env.ALIYUN_PASSWORD }}"
 
-
   merge-relase:
     runs-on: ubuntu-latest
     steps:
