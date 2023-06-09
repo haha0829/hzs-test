@@ -63,15 +63,52 @@ jobs:
 #              --user ${{ env.ALIYUN_USER }} \
 #              --password "${{ env.ALIYUN_PASSWORD }}"
 
-
   merge-relase:
     runs-on: ubuntu-latest
     steps:
-      - name: Check filesystem type
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: get base commit id
+        id: get_base_commit_id
         run: |
-          for release in $(echo "${{ inputs.VERSION }}" | sed 's/|/ /g'); do
-              script -e -c " echo \"$(date "+%Y-%m-%d-%T"):$release\" "
+          test="$(git rev-list ${{ github.ref_name }})"
+          main="$(git rev-list origin/main)"
+          for commit1 in $( echo "$test" ); do
+            found=0
+            for commit2 in $( echo "$main" ); do
+              if [[ "$commit1" == "$commit2" ]]; then
+                BASE_COMMIT_ID=$commit1
+                echo $BASE_COMMIT_ID
+                echo base_commit_id=$BASE_COMMIT_ID >> $GITHUB_OUTPUT
+                found=1
+                break
+              fi
+            done
+            if [[ $found -eq 1 ]]; then
+              break
+            fi
           done
+
+      - name: get current commit
+        run: |
+          echo ${{ github.event.pull_request.base.ref }}
+          echo ${{ github.event.pull_request.base.sha }}
+          echo ${{ github.event.pull_request.head.ref }}
+          echo ${{ github.event.pull_request.head.sha }}
+          
+          git branch
+          git rev-list -1 ${{ github.ref_name }}
+          echo ${{ github.sha }}
+          echo ${{ steps.get_base_commit_id.outputs.base_commit_id }}
+          git diff --name-only ${{ github.sha }} ${{ steps.get_base_commit_id.outputs.base_commit_id }}
+          echo "1"
+          
+    
+
+#          for release in $(echo "${{ inputs.VERSION }}" | sed 's/|/ /g'); do
+#              script -e -c " echo \"$(date "+%Y-%m-%d-%T"):$release\" "
+#          done
 #          docker version
 #          echo "$(date "+%Y-%m-%d-%T")"
 #          df -T
