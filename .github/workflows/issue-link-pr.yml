@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: check branch name
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: JashBook/check-branch-name@v0.1.0
         with:
           branch_pattern: 'feature/|bugfix/|release/|hotfix/|support/'
