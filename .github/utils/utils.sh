@@ -23,6 +23,7 @@ Usage: $(basename "$0") <options>
                                 12) send message
                                 13) delete docker images
                                 14) delete aliyun images
+                                15) set size label
     -tn, --tag-name           Release tag name
     -gr, --github-repo        Github Repo
     -gt, --github-token       Github token
@@ -31,6 +32,7 @@ Usage: $(basename "$0") <options>
     -bw, --bot-webhook        The bot webhook
     -tt, --trigger-type       The trigger type (e.g. release/package)
     -ru, --run-url            The run url
+    -pn, --pr-number          The pull request number
 EOF
 }
 
@@ -52,6 +54,7 @@ main() {
     local RUN_URL=""
     local USER=""
     local PASSWORD=""
+    local PR_NUMBER=""
 
     parse_command_line "$@"
 
@@ -96,6 +99,9 @@ main() {
         ;;
         14)
             delete_aliyun_images
+        ;;
+        15)
+            set_size_label
         ;;
         *)
             show_help
@@ -176,6 +182,12 @@ parse_command_line() {
             -p|--password)
                 if [[ -n "${2:-}" ]]; then
                     PASSWORD="$2"
+                    shift
+                fi
+                ;;
+            -pn|--pr-number)
+                if [[ -n "${2:-}" ]]; then
+                    PR_NUMBER="$2"
                     shift
                 fi
                 ;;
@@ -413,6 +425,62 @@ delete_aliyun_images() {
     echo "delete kubeblocks-tools image $TAG_NAME_TMP"
     skopeo delete docker://registry.cn-hangzhou.aliyuncs.com/apecloud/kubeblocks-tools:$TAG_NAME_TMP \
         --creds "$USER:$PASSWORD"
+}
+
+set_size_label() {
+    pr_changes=$( gh_curl -s $GITHUB_API/repos/$LATEST_REPO/pulls/$PR_NUMBER/files | jq -r '.[].changes' )
+    total_changes=0
+    for changes in $( echo "$pr_changes" ); do
+       total_changes=$(( $total_changes + $changes ))
+    done
+    size_label=""
+    if [[ $total_changes -lt 10 ]]; then
+        size_label="size/XS"
+    elif [[ $total_changes -lt 30 ]]; then
+        size_label="size/S"
+    elif [[ $total_changes -lt 100 ]]; then
+        size_label="size/M"
+    elif [[ $total_changes -lt 500 ]]; then
+        size_label="size/L"
+    elif [[ $total_changes -lt 1000 ]]; then
+        size_label="size/XL"
+    else
+        size_label="size/XXL"
+    fi
+    echo "size label:$size_label"
+    label_list=$( gh pr view $PR_NUMBER --repo $LATEST_REPO | grep labels: )
+    remove_label=""
+    add_label=true
+    for label in $( echo "$label_list" ); do
+        label=${label/,/}
+        case $label in
+            $size_label)
+                add_label=false
+                continue
+            ;;
+            size/*)
+                if [[ -z "$remove_label" ]]; then
+                    remove_label=$label
+                else
+                    remove_label="$label,$remove_label"
+                fi
+            ;;
+        esac
+    done
+    if [[ "$remove_label" == *"," ]]; then
+        echo $remove_label
+        remove_label=${remove_label::-1}
+    fi
+
+    if [[ ! -z "$remove_label" ]]; then
+        echo "remove label:$remove_label"
+        gh pr edit $PR_NUMBER --repo $LATEST_REPO --remove-label "$remove_label"
+    fi
+
+    if [[ $add_label == true ]]; then
+        echo "add label:$size_label"
+        gh pr edit $PR_NUMBER --repo $LATEST_REPO --add-label "$size_label"
+    fi
 }
 
 main "$@"
