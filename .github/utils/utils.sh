@@ -39,7 +39,7 @@ LATEST_REPO=JashBook/hzs-test
 
 main() {
     local TYPE
-    local TAG_NAME
+    local TAG_NAME=""
     local GITHUB_REPO
     local GITHUB_TOKEN
     local TRIGGER_MODE=""

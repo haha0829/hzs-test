@@ -72,6 +72,11 @@ jobs:
       - name: get base commit id
         id: get_base_commit_id
         run: |
+          find --help
+          # find ./* -maxdepth 1 -type f -name '*_test.go' 
+          find ./* -maxdepth 1 -type d 
+          
+          
           test="$(git rev-list ${{ github.ref_name }})"
           main="$(git rev-list origin/main)"
           for commit1 in $( echo "$test" ); do
