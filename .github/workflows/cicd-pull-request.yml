@@ -27,6 +27,8 @@ jobs:
           echo "base_ref:${{ github.base_ref }}"
           echo "ref:${{ github.event.pull_request.head.ref }}"
           echo "ref:${{ github.event.pull_request.base.ref }}"
+          echo "full_name:${{ github.event.pull_request.head.repo.full_name }}"
+          echo "repository:${{ github.repository }}"
           
           echo ${{ github.event.pull_request.base.ref }}
           echo ${{ github.event.pull_request.base.sha }}
