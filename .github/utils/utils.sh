@@ -40,10 +40,10 @@ GITHUB_API="https://api.github.com"
 LATEST_REPO=JashBook/hzs-test
 
 main() {
-    local TYPE
+    local TYPE=""
     local TAG_NAME=""
-    local GITHUB_REPO
-    local GITHUB_TOKEN
+    local GITHUB_REPO=""
+    local GITHUB_TOKEN=""
     local TRIGGER_MODE=""
     local EXIT_STATUS=0
     local BRANCH_NAME=""
