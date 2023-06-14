@@ -31,10 +31,10 @@ jobs:
 
   fork-size-label:
     if: github.event.pull_request.head.repo.full_name != github.repository
-    uses: apecloud/apecloud-cd/.github/workflows/trigger-workflow.yml@v0.1.1
+    uses: apecloud/apecloud-cd/.github/workflows/trigger-workflow.yml@v0.1.2-aplha.0
     with:
       GITHUB_REPO: "JashBook/hzs-test"
       WORKFLOW_ID: "pull-request-label-size.yaml"
       VERSION: "${{ github.event.pull_request.number }}"
-      APECD_REF: "v0.1.1"
+      APECD_REF: "v0.1.2-aplha.0"
     secrets: inherit
