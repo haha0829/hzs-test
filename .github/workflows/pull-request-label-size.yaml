@@ -8,6 +8,7 @@ env:
 
 jobs:
   size-label:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     outputs:
       size-label: ${{ steps.get_size_label.outputs.size_label }}
@@ -16,4 +17,5 @@ jobs:
       - name: set size label
         run: |
           bash .github/utils/utils.sh --type 15 \
+              --github-token ${{ env.GITHUB_TOKEN }}
               --pr-number ${{ github.event.pull_request.number }}
