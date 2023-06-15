@@ -1,14 +1,9 @@
 name: PULL-REQUEST-LABEL-SIZE
 
 on:
+  pull_request_target:
+    types: [ edited, opened, synchronize ]
   pull_request:
-  workflow_dispatch:
-    inputs:
-      VERSION:
-        description: "The PR number"
-        type: string
-        required: false
-        default: ''
 
 env:
   GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -21,20 +16,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: set size label
         run: |
-          pr_number="${{ github.event.pull_request.number }}"
-          if [[ ! -z "${{ inputs.VERSION }}" ]]; then
-              pr_number=${{ inputs.VERSION }}
-          fi
           bash .github/utils/utils.sh --type 15 \
               --github-token "${{ env.GITHUB_TOKEN }}" \
-              --pr-number $pr_number
+              --pr-number ${{ github.event.pull_request.number }}
 
-  fork-size-label:
-    if: github.event.pull_request.head.repo.full_name != github.repository
-    uses: apecloud/apecloud-cd/.github/workflows/trigger-workflow.yml@v0.1.2-aplha.0
-    with:
-      GITHUB_REPO: "JashBook/hzs-test"
-      WORKFLOW_ID: "pull-request-label-size.yaml"
-      VERSION: "${{ github.event.pull_request.number }}"
-      APECD_REF: "v0.1.2-aplha.0"
-    secrets: inherit
